@@ -198,7 +198,8 @@ var deleteUser = {
 }
 
 var deleteUserFromTeam = {
-
+ mess0:"",
+ mess1:""
 }
 
 var forceDeleteUser = {
@@ -283,6 +284,9 @@ function defineTranslationVars(lang){
 	//deutsch
 	if(lang == "de"){
 	//console.log("de");
+		
+		deleteUserFromTeam.mess0="User wurde erfolgreich aus Team entfernt";
+		deleteUserFromTeam.mess1="Sie können sich nicht selbst entfernen. Klicken Sie bitte im vorigen Menü auf die X Schaltfläche!";
 		
 		login.name1="Username";
 		login.pass="Passwort";
@@ -457,6 +461,9 @@ function defineTranslationVars(lang){
 	//englisch
 	//console.log("en");
 	
+		deleteUserFromTeam.mess0="User successfully deleted";
+		deleteUserFromTeam.mess1="You cannot delete yourself. Please go back to the previous modal an click the X button!";
+	
 		login.name1="Username";
 		login.pass="Password";
 		login.register="Register";
@@ -570,7 +577,7 @@ function defineTranslationVars(lang){
 		modal_user.name="Username:";
 		
 		userdel_admin.title="Do you really want to delete this user?";
-		userdel_admin.message="Error: User is assigned to at least one team. Please assign it to another user oder delete it!";
+		userdel_admin.message="Error: User is assigned to at least one team. Please assign it to another user or delete it!";
 		userdel_admin.teamname="Team name";
 		userdel_admin.owner="New owner";
 		userdel_admin.ok="Accept";

@@ -49,6 +49,11 @@ sessionStorage.setItem('free',true);
 	  if(isBlocked() == "false"){ getRequirements();}
 	});
 	
+	 socket.on('reqFail',function(code) {
+      var mess = reqForm.mess3;
+	  $('#error').text(mess).slideDown(500).delay(2000).slideUp(500);
+	});
+	
     // Add a disconnect listener
 
 	socket.on('requestUsers',function(){

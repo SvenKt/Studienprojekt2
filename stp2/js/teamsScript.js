@@ -229,29 +229,23 @@ $( "#dialog" ).dialog({
 		}
 	});
 }
-
-//Team (&Anforderungen) löschen
-function deleteTeam(team_id){
-//erst team verlassen, damit keine foreign key exceptions in mysql auftreten
-	var user = getUserName();
-	$.ajax({
-		url: "php/deleteTeam.php",
-		type: "POST",
-		data: {"user":user, "team_id": team_id},
-		dataType: "json",
-		success: function(success){
-		var mess;
-			refreshTeamData();
-			switch (success) {
+socket.on('deleteTeam',function(code){
+	console.log("delete answer");
+	var mess;
+	switch (code) {
 				case 0: mess = deleteTeam.mess0; break;
 				case 1: mess = deleteTeam.mess1; break;
 				case 2: mess = deleteTeam.mess2; break;
 				case 3: mess = deleteTeam.mess3; break;
-			}
-			$("#head_modal_dash_team").text(mess).slideDown(500).delay(2000).slideUp(500);	
-		},
-		error: function(error){alert("Error: Deleting team failed.");}
-	});
+	}
+	refreshTeamData();
+	$("#head_modal_dash_team").text(mess).slideDown(500).delay(2000).slideUp(500);
+	getRequirements();
+});
+
+function deleteTeam(team_id){
+	var user = getUserName();
+	socket.emit('deleteTeam',{user: user,teamid:team_id});
 }
 
 socket.on('getTeamDropdown',function(teams){
@@ -294,19 +288,19 @@ function addTeamMember(){
 	socket.emit('addTeamMember',{user: newMember,team: team});
 }
 
+socket.on('deleteUserFromTeam',function(data){
+var mess;
+	switch(data.code){
+		case 0: mess=deleteUserFromTeam.mess0;break;
+		case 1: mess=deleteUserFromTeam.mess1;break;
+	}
+	$("#head_modal_dash_team_edit").text(mess).slideDown(500).delay(2000).slideUp(500);
+	//aktualisiert die ansicht im editier modal
+	editTeam(data.teamid);
+});
+
 function deleteUserFromTeam(userID,teamID){
-	$.ajax({
-		url: "php/deleteUserFromTeam.php",
-		type: "POST",
-		data: {"userID": userID},
-		dataType: "json",
-		success: function(success){
-			refreshTeamData();	
-			$("#head_modal_dash_team_edit").text(success).slideDown(500).delay(2000).slideUp(500);
-			//aktualisiert die ansicht im editier modal
-			editTeam(teamID);
-		}
-	});
+	socket.emit('deleteUserFromTeam',{id: userID,teamid:teamID});
 }
 
 function editTeam(teamID){
@@ -358,30 +352,21 @@ function placeholder(){
 //für funktionen, die eine funktion als param benötigen
 //aber diese für den jeweiligen zweck undienlich ist.
 }
-
-function showUserData(userID){
-	$.ajax({
-		url: "php/getUserInfos.php",
-		type: "POST",
-		data: {"userID":userID},
-		dataType: "json",
-		success: function(userData){
-			var name=userData[0];
-			var mail=userData[1];
-			var body=$("#content_userData");
+socket.on('getUserInfos',function(infos){
+	var name=infos.username;
+	var mail=infos.email;
+	var body=$("#content_userData");
 			
 			//Übersetzung muss hier gemacht werden, da das DOM bei klick auf englisch/deutsch noch nicht existiert!!!
 			
-			body.html("<div class='row'>\
-						<label class='col-md-3'>"+modal_user.name+"</label><label class='col-md-8'>"+name+"</label><br/>\
-						<label class='col-md-3'>E-Mail:</label>\
-						<label class='col-md-8'>\
-							<a href='mailto:"+mail+"?Subject=Kontakt%20über%20Red:Wire'>"+mail+"</a>\
-						</label><br/>\
-					   </div>");
-			
-		}
-	});
-
+	body.html("<div class='row'>\
+				<label class='col-md-3'>"+modal_user.name+"</label><label class='col-md-8'>"+name+"</label><br/>\
+				<label class='col-md-3'>E-Mail:</label>\
+				<label class='col-md-8'>\
+					<a href='mailto:"+mail+"?Subject=Kontakt%20über%20Red:Wire'>"+mail+"</a>\
+				</label><br/>\
+			   </div>");
+});
+function showUserData(userID){
+	socket.emit('getUserInfos',userID);
 }
-//<a href='mailto:"+mail+"'><span class='glyphicon glyphicon-envelope' aria-hidden='true'></span></a> "+mail+"\
