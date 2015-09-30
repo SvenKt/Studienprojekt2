@@ -548,11 +548,3 @@ function placeholder(){
 //für funktionen, die eine funktion als param benötigen
 //aber diese für den jeweiligen zweck undienlich ist.
 }
-
-function getUsersTeamID(userID){
-//implementieren!!!!
-//über team_id des users die project_ids der reqs bei edit() prüfen
-//dann nur löschen, wenn req wieder eingefügt werden kann
-// checkInput() -> comparePIDs(getUserTeamID(),newIDFromInputField) -> delete -> insert 
-
-}

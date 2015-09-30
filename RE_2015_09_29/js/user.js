@@ -1,22 +1,5 @@
 var sessionID;
 
-function initArrayLength(){
-var arr = new Object();
-var arrayOfTimeStamps;
-var user= getUserName();
-$.ajax({
-			url: "php/getUpdates.php",
-			type: "POST",
-			data: {"username": user},
-			dataType: "json",
-			success: function(success){
-						arr.length=success.length;
-						//console.log(arr.length);
-						localStorage.setItem("array", JSON.stringify(arr));
-				},
-			error: function(){alert("error");}
-			});
-}
 
 
 function getParameter(param){
