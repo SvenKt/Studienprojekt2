@@ -17,7 +17,7 @@ var reqToEdit;
 
 //db connection, wenn error dann log in console
 db.connect(function(err){
-    if (err) console.log(err)
+    if (err) {throw err;}//console.log(err)
 })
 
 //server hört auf port 3000 --> verbindung mittels "localhost:3000"
@@ -51,13 +51,13 @@ function isInArray(sock,arr){
 
 //falls neu verbundener user noch nicht im userarray, wird er hinzugefügt
 function addUserToArray(username,sock){
-	//console.log(username);
+	////console.log(username);
 	var id = db.query('Select users.team_id, users.id from users where users.username="'+username+'"',  function(err, rows, fields){
 		if (err) throw err;
 		var user = {name: username,id: rows[0].id, teamID: rows[0].team_id, socket: sock};
 			var i = isInArray(sock,users);
 			if (i == -1) users.push(user);
-			//console.log(users);
+			////console.log(users);
 	});	
 	
 }
@@ -97,23 +97,23 @@ io.on('connection', function (socket) {
 	// für debug, gibt auf anfrage des clients userarray aus
 	socket.on('showUsers',function(){
 		console.log(users);
-		console.log("ahuuuu");
+		//console.log("ahuuuu");
 	});
 	
 	//listener hört auf eintragung einer neuen anforderung 
 	socket.on('newReq',function(data){
-		console.log("Neue Anforderung");
+		//console.log("Neue Anforderung");
 		var teamid;
 		var members = [];
 		
 		//holt ID des Erstellers der Anforderung
 		for(var i=0;i<users.length;i++){
-		console.log(users[i]);
+		//console.log(users[i]);
 			if (users[i].name==data.user){
 				teamid=users[i].teamID;
 			}
 		}
-		console.log(users);
+		//console.log(users);
 		//holt die Mitglieder des erstellerteams und speichert sie im membersarray
 		for(var i=0;i<users.length;i++){
 			if (users[i].teamID==teamid){
@@ -165,7 +165,7 @@ io.on('connection', function (socket) {
 			socket.emit('doEditReq',req_data);
 	});
 	
-	console.log(reqToEdit);
+	//console.log(reqToEdit);
 	
 	});
 	
@@ -174,19 +174,19 @@ io.on('connection', function (socket) {
 	
 	
 	
-		console.log("Req edited");
+		//console.log("Req edited");
 		var teamid;
 		var members = [];
 		var mess; 
 		
 		//get creator's team id
 		for(var i=0;i<users.length;i++){
-		console.log(users[i]);
+		//console.log(users[i]);
 			if (users[i].name==data.user){
 				teamid=users[i].teamID;
 			}
 		}
-		console.log(users);
+		//console.log(users);
 		//get members of creator's team
 		for(var i=0;i<users.length;i++){
 			if (users[i].teamID==teamid){
@@ -233,13 +233,13 @@ io.on('connection', function (socket) {
 			socket.emit('delReq');
 		});
 		
-		console.log("Req deleted");
+		//console.log("Req deleted");
 		var teamid;
 		var members = [];
 		
 		//get creator's team id
 		for(var i=0;i<users.length;i++){
-		console.log(users[i]);
+		//console.log(users[i]);
 			if (users[i].name==data.user){
 				teamid=users[i].teamID;
 			}
@@ -267,7 +267,7 @@ io.on('connection', function (socket) {
 			if (users[i].name==data.user){
 				teamid=users[i].teamID;
 				userid=users[i].id;
-				console.log(userid+" "+teamid);
+				//console.log(userid+" "+teamid);
 			}
 		}
 		
@@ -278,17 +278,17 @@ io.on('connection', function (socket) {
 				if (err) throw err;
 			});
 		
-			console.log("Neue Anforderung");
+			//console.log("Neue Anforderung");
 			var members = [];
 		
 			//get creator's team id
 			for(var i=0;i<users.length;i++){
-			console.log(users[i]);
+			//console.log(users[i]);
 				if (users[i].name==data.user){
 					teamid=users[i].teamID;
 				}
 			}
-			console.log(users);
+			//console.log(users);
 			//get members of creator's team
 			for(var i=0;i<users.length;i++){
 				if (users[i].teamID==teamid){
@@ -315,7 +315,7 @@ io.on('connection', function (socket) {
 			if (err){ throw err; code=1;}
 			var alreadyExists = false;
 			for (var i = 0; i< rows.length; i++){
-				//console.log(rows[i]);
+				////console.log(rows[i]);
 				if(data.team == rows[i].name){
 					alreadyExists=true;
 				}
@@ -326,7 +326,7 @@ io.on('connection', function (socket) {
 					if (err) {throw err;  socket.emit('createTeam',code);}
 					var id;
 					id=rows[0];
-					//console.log(id.id);
+					////console.log(id.id);
 				
 					var injection = "insert into team (name, creator_id) values('"+data.team+"','"+id.id+"');";
 					//console.log(injection);
@@ -343,6 +343,8 @@ io.on('connection', function (socket) {
 	
 	socket.on('insertTeamOwner', function(data){
 		//console.log(data);
+		
+		
 		var code;
 		var UserID="select team_id from users where username='"+data.user+"';";
 		var getUserID = db.query(UserID, function(err,rows,fields){
@@ -360,6 +362,11 @@ io.on('connection', function (socket) {
 						var insertUser = db.query(insert_query, function(err){
 							if (err) {throw err;  code=3; socket.emit('insertTeamOwner',code);}
 							else {
+								for(var i=0;i<users.length;i++){
+									if (users[i].name==data.user){
+										users[i].teamID=teamid;
+									}
+								}
 								 code=0; socket.emit('insertTeamOwner',code);
 							}
 						});
@@ -632,6 +639,7 @@ var query = "update users set team_id="+teamid+" where username='"+user+"';";
 		if (err) {code = 1;socket.emit('intoTeam',code);}
 		for(var i=0;i<users.length;i++){
 		if(typeof users[i] != "undefined"){
+			console.log("intoTeam id "+teamid);
 			if (users[i].name==user){
 				users[i].teamID=teamid;
 			}
@@ -700,7 +708,7 @@ socket.on('deleteTeam',function(data){
 			}
 		}
 	}
-	console.log("\n\n\n");
+	//console.log("\n\n\n");
 	//get user's team id
 	var query = "select team_id from users where username='"+username+"';";
 	var deleteFromTeam =  db.query(query, function(err,rows,fields){
@@ -708,8 +716,8 @@ socket.on('deleteTeam',function(data){
 			usersTeamID=rows[0].team_id;
 			
 			//debug
-			console.log("usersTeamID :"+usersTeamID); //ok
-			console.log("teamIDtodelete :"+teamIDtoDelete);
+			//console.log("usersTeamID :"+usersTeamID); //ok
+			//console.log("teamIDtodelete :"+teamIDtoDelete);
 			
 			//count users in team
 			var query2 = "select users.username from users, team where users.team_id=team.id AND team.id='"+teamIDtoDelete+"';"; 
@@ -718,7 +726,7 @@ socket.on('deleteTeam',function(data){
 				numerOfUsersInTeam = rows.length;
 				
 				//debug
-				console.log("numberOfUsers: "+numerOfUsersInTeam); //ok
+				//console.log("numberOfUsers: "+numerOfUsersInTeam); //ok
 				
 				// get id of team creator
 				var query3 = "select team.creator_id from team where team.id='"+teamIDtoDelete+"';";
@@ -727,7 +735,7 @@ socket.on('deleteTeam',function(data){
 					creatorID=rows[0].creator_id;
 					
 					//debug
-					console.log("creatorID: "+creatorID); //ok
+					//console.log("creatorID: "+creatorID); //ok
 					
 					//check if user is either creator or admin,
 					//if not -> no deleting rights
@@ -736,19 +744,19 @@ socket.on('deleteTeam',function(data){
 							code=3; //at least 1 remaining user in team
 							
 							//debug
-							console.log("more than 1 user, code=3");
+							//console.log("more than 1 user, code=3");
 							
 							socket.emit('deleteTeam',code);
 						} else {
 							
 							//debug
-							console.log("less or equal than 1 user, continue..."); //ok
-							console.log("usersTeamID :"+usersTeamID); //ok
-							console.log("teamIDtodelete :"+teamIDtoDelete);
+							//console.log("less or equal than 1 user, continue..."); //ok
+							//console.log("usersTeamID :"+usersTeamID); //ok
+							//console.log("teamIDtodelete :"+teamIDtoDelete);
 							
 							//if user is in the team he wants to delete then...
 							if (usersTeamID == teamIDtoDelete){
-								console.log("hey, its user's team :D");
+								//console.log("hey, its user's team :D");
 								//...set user's team id = null
 								var query4 = "update users set team_id=NULL where username='"+username+"';";
 								var deleteFromTeam =  db.query(query4, function(err,rows,fields){
@@ -763,12 +771,12 @@ socket.on('deleteTeam',function(data){
 								var query6 = "delete from team where id="+teamIDtoDelete+";";
 								var deleteTeam =  db.query(query6, function(err,rows,fields){
 									if (err) { throw err;
-											console.log("error ,code=1");
+											//console.log("error ,code=1");
 											code=1; //konnte nicht gelöscht werden
 										socket.emit('deleteTeam',code);
 									}
 									//debug
-									console.log("all ok!!! ,code=0");
+									//console.log("all ok!!! ,code=0");
 									
 									//set teamID in users array = null
 									for(var i=0;i<users.length;i++){
@@ -785,7 +793,7 @@ socket.on('deleteTeam',function(data){
 					} else {
 						code=2;
 						//debug
-						console.log("error, u have no rights");
+						//console.log("error, u have no rights");
 						socket.emit('deleteTeam',code);
 					}
 				});
@@ -819,10 +827,10 @@ socket.on('getAllUsers',function(query){
 	
 		
 	if(query != null){
-		console.log("query not null");
+		//console.log("query not null");
 		var getUsers = "SELECT username, id, team_id, email FROM users WHERE username like '%"+query+"%' OR email like '%"+query+"%' ;";
 	} else {
-		console.log("query null");
+		//console.log("query null");
 		var getUsers = "SELECT username, id, team_id, email FROM users;";
 	}
 	var allUsers = db.query(getUsers, function(err,rows,fields){
@@ -840,30 +848,30 @@ socket.on('getAllUsers',function(query){
 
 
 socket.on('forceDeleteUser', function(id){
-console.log("fdu id "+id);
+//console.log("fdu id "+id);
 	//check if user has a team
 	var checkTeam = "select team_id from users where id='"+id+"';";
 	var teamChecked = db.query(checkTeam, function(err,rows,fields){
-		if (err) {throw err; console.log("q1");}
+		if (err) {throw err;} //console.log("q1");}
 		//if user has a team...
 		if(rows != null){
 			//...delete him from the team
 			var leaveTeam = "update users set team_id=NULL where id='"+id+"';";
 			var teamChecked = db.query(leaveTeam, function(err,rows,fields){
-				if (err) {throw err;console.log("q1");}
-				console.log("set teamid = null");
+				if (err) {throw err;}//console.log("q1");}
+				//console.log("set teamid = null");
 			});
 			
 			var delReqs = "delete from requirements where owner_id="+id+";";
 			var teamChecked = db.query(delReqs, function(err,rows,fields){
-				if (err) {throw err;console.log("q1");}
-				console.log("deleted all user's reqs");
+				if (err) {throw err;}//console.log("q1");}
+				//console.log("deleted all user's reqs");
 			});
 			
 			var delUser = "delete from users where id='"+id+"';";
 			var teamChecked = db.query(delUser, function(err,rows,fields){
-				if (err) {throw err;console.log("q1");}
-				console.log("deleted user");
+				if (err) {throw err;}//console.log("q1");}
+				//console.log("deleted user");
 				socket.emit('forceDeleteUser');
 			});
 		}
@@ -884,21 +892,21 @@ socket.on('getMyGroups',function(user){
 	var getAllTeams = db.query(query, function(err,rows,fields){
 		if (err) {throw err;}
 		for (var i= 0; i< rows.length;i++) {
-			//console.log(rows[i]);
+			////console.log(rows[i]);
 			//teams the user is owning, or member of
 			myTeams.push({name: rows[i].name, id: rows[i].id});
 			usersTeamID=rows[i].team_id;
-			console.log("userID "+userID+" row creator id "+rows[i].creator_id);
+			//console.log("userID "+userID+" row creator id "+rows[i].creator_id);
 			if(userID == rows[i].creator_id){
 				userIsCreatorOf.push({name: rows[i].name, id: rows[i].id});
 			}
 		}
 		if (myTeams.length > 0){
 			for (var i= 0; i< myTeams.length;i++) {
-				console.log("myTeams: "+myTeams[i].name);
+				//console.log("myTeams: "+myTeams[i].name);
 			}
-			console.log("usersTeamID: "+usersTeamID);	
-			console.log("userIsCreatorOf "+userIsCreatorOf);	
+			//console.log("usersTeamID: "+usersTeamID);	
+			//console.log("userIsCreatorOf "+userIsCreatorOf);	
 	
 		
 			if(usersTeamID != null){
@@ -907,7 +915,7 @@ socket.on('getMyGroups',function(user){
 				var getTeamName= db.query(query2, function(err,rows,fields){
 					if (err) {throw err;}
 					memberOf=rows[0].name;
-					console.log("userIsCreatorOf: "+userIsCreatorOf);
+					//console.log("userIsCreatorOf: "+userIsCreatorOf);
 					var groups = [ myTeams,memberOf,userIsCreatorOf,user ];	
 					socket.emit('getMyGroups',groups);
 				});
@@ -934,41 +942,41 @@ socket.on('getGroupsToDelete',function(user){
 	var userID = user[1];
 	var userTeamID;
 		
-	console.log(userID);
+	//console.log(userID);
 	var query = "select team.name, team.creator_id ,team.id, users.team_id from team,users where (team.creator_id=users.id OR team.id=users.team_id) AND users.username='"+user[0]+"';";
 	var getAllTeams = db.query(query, function(err,rows,fields){
 		if (err) {throw err;}
 		for (var i= 0; i< rows.length;i++) {
-			//console.log(rows[i]);
+			////console.log(rows[i]);
 			//teams the user is owning, or member of
 			myTeams.push({name: rows[i].name, id: rows[i].id});
 			usersTeamID=rows[i].team_id;
-			console.log("userID "+userID+" row creator id "+rows[i].creator_id);
+			//console.log("userID "+userID+" row creator id "+rows[i].creator_id);
 			if(userID == rows[i].creator_id){
 				userIsCreatorOf.push({name: rows[i].name, id: rows[i].id});
 			}
 		}
 		if (myTeams.length > 0){
 			/*for (var i= 0; i< myTeams.length;i++) {
-				console.log("myTeams: "+myTeams[i].name);
+				//console.log("myTeams: "+myTeams[i].name);
 			}
-			console.log("usersTeamID: "+usersTeamID);	
-			console.log("userIsCreatorOf "+userIsCreatorOf);	
+			//console.log("usersTeamID: "+usersTeamID);	
+			//console.log("userIsCreatorOf "+userIsCreatorOf);	
 	
-			console.log("user[1]: "+user[1]);*/
+			//console.log("user[1]: "+user[1]);*/
 			if(usersTeamID != null){
 			
 				var query2 = "select name from team where id="+usersTeamID+";";
 				var getTeamName= db.query(query2, function(err,rows,fields){
 					if (err) {throw err;}
 					memberOf=rows[0].name;
-					console.log("memberOf: "+memberOf);
-					console.log("userIsCreatorOf: "+userIsCreatorOf);
+					//console.log("memberOf: "+memberOf);
+					//console.log("userIsCreatorOf: "+userIsCreatorOf);
 					var groups = [ myTeams,memberOf,userIsCreatorOf,user[0],userID ];	
 					socket.emit('getMyGroups',groups);
 				});
 			} else {
-					console.log(userID);
+					//console.log(userID);
 					var groups = [ myTeams,memberOf,userIsCreatorOf,user[0],userID];					
 					socket.emit('getMyGroups',groups);
 				}

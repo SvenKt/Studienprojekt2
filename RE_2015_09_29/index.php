@@ -3,13 +3,10 @@
 <html>
 	<head>
 		<script src="http://code.jquery.com/jquery-latest.js"></script>
-		<script type="text/javascript" src="js/user.js"></script>
-		<script type="text/javascript" src="js/lang.js"></script>
 		<script type="text/javascript" src="js/translate.js"></script>
 		<script src="bootstrap/js/bootstrap.min.js"></script>
 		<script src="http://localhost:3000/socket.io/socket.io.js"></script>
 		<script type="text/javascript" src="js/dashboardScript.js"></script>
-		<script type="text/javascript" src="js/loginScript.js"></script>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">

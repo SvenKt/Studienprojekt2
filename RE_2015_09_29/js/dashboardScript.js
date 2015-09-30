@@ -1,28 +1,29 @@
-////////////////
-//USES user.js//
-////////////////
-
+// Add a connect listener
 var socket = io.connect('http://localhost:3000');
+
+// VARS
 var feedEmpty=true;
 var blocked=false;
-	
-    // Add a connect listener
-   
-
-    // Sends a message to the server via sockets
-
-
-function isBlocked(){
-	return sessionStorage.getItem('blocked');
-}
-
-function setBlock(val){
-	sessionStorage.setItem('blocked',val);
-}
+var oldActive;
+    
 
 $(document).ready(function(){
-getMyGroups();
-sessionStorage.setItem('free',true);
+	getMyGroups();
+	setBlock(false);
+	$("#read").hide();
+	$("#error").hide();
+	$("#accordion").accordion({collapsible: true});
+	$("#patchnotes").html(patchnotes);
+	$("#chooseDownload").hide();
+	$("#patchnotes").accordion({collapsible: true});
+	$("#dialog_team_modal").hide();
+	//seite ist auch in adminpage eingebunden
+	//TT sollen nur auf dashboard sein
+	if(window.location.pathname.search("admin") == -1 ){
+		enableTooltips();
+	}
+
+	switchToDE();
 
 
  socket.on('connect',function() {
@@ -119,7 +120,123 @@ sessionStorage.setItem('free',true);
 		//$('body').delay(2000).css({'overflow':'visible'});
 	});
 	$('[data-toggle="popover"]').popover();
+	
+	
+	///////////////////////////
+	//	KEY LISTENERS  START //
+	///////////////////////////
+	
+		//enter bestätigung beim erstellen von teams
+	$("#team_name").keypress(function(event){
+			var keycode = (event.keyCode ? event.keyCode : event.which);
+			if(keycode == '13'){
+				createTeam();
+			}
+			event.stopPropagation();
+		});
+
+	//enter bestätigung beim hinzufügen von teammitgliedern
+	$("#team_user").keypress(function(event){
+		var keycode = (event.keyCode ? event.keyCode : event.which);
+		if(keycode == '13'){
+			addTeamMember();
+		}
+		event.stopPropagation();
+	});
+
+	//enter bestätigung im suchfeld
+	$("#search_field").keypress(function(event){
+		var keycode = (event.keyCode ? event.keyCode : event.which);
+		if(keycode == '13'){
+			getResult();
+		}
+		event.stopPropagation();
+	});
+		
+	//navlist anpassungen nach Modal
+	$('#main-nav li a').on('click', function() {
+		oldActive = $(this).parent().parent().find('.active');
+		if($(this).attr('id') != "downloadNav") {
+			$(this).parent().parent().find('.active').removeClass('active');
+			$(this).parent().addClass('active');
+		}
+	});
+	$("#profil").on('hidden.bs.modal', function(){
+		$('#main-nav').find('.active').removeClass('active');
+		oldActive.addClass('active');
+	});
+	$("#team_modal").on('hidden.bs.modal', function(){
+		$('#main-nav').find('.active').removeClass('active');
+		oldActive.addClass('active');
+	});
+	
+	/////////////////////////
+	//	KEY LISTENERS END  //
+	/////////////////////////
+	
 });
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////LOGIN////////START//////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+socket.on('registerUser', function(data){
+	var mess;
+	switch(data){
+		case 0: mess=login.mess0; break;
+		case 1: mess=login.mess1;break;
+		case 2: mess=login.mess2;break;
+		case 3: mess=login.mess3;break;
+		case 4: mess=login.mess4;break;
+		case 5: mess=login.mess5;break;
+	}
+	$("#head_modal").text(mess).slideDown(500).delay(2000).slideUp(500);
+	if ((mess.search("Fehler") == -1) && (mess.search("Error") == -1)){ window.setTimeout(function(){$('#register').modal('hide'); }, 2000);};
+});
+
+
+function checkCredentials(){
+var user=$("#userPHP").val();
+var pass=$("#passPHP").val();
+socket.emit('checkLogin',{user: user,pw: pass});
+}
+
+socket.on('checkLogin',function(user){
+	if(user.exists){
+		createUser(user.name);
+		redirectToDashboard();
+	} else {
+		$('#read').text(login.credentials).slideDown(500).delay(2000).slideUp(500); 
+	}
+});
+
+function registerUser(){
+var username=$("#reg_user").val();
+var password=$("#reg_pw").val();
+var password_repeat=$("#reg_pw2").val();
+var email=$("#reg_email").val();
+
+console.log(username+" "+password+" "+password_repeat+" "+email);
+socket.emit('registerUser', {user: username,pw:password,pw2:password_repeat,mail:email});
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////LOGIN////////END////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////DASHBOARD////////START//////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+function isBlocked(){
+	return sessionStorage.getItem('blocked');
+}
+
+function setBlock(val){
+	sessionStorage.setItem('blocked',val);
+}
 
 function insertIntoFeed(mess){
 	 $('#feed').append("<p class='panel feeditem'>"+mess+"</p>");
@@ -548,3 +665,756 @@ function placeholder(){
 //für funktionen, die eine funktion als param benötigen
 //aber diese für den jeweiligen zweck undienlich ist.
 }
+
+function enableTooltips(){
+		
+		defineTranslationVars(language);
+
+		$('#l1').attr('title',menu.item1_tt);
+		$('#l2').attr('title',menu.item2_tt);
+		$('#l3').attr('title',menu.item3_tt);
+		$('#l4').attr('title',menu.item4_tt);
+		$('#l5').attr('title',menu.item5_tt);
+		$('#l6').attr('title',menu.item6_tt);
+	
+		$('#sortHead1').attr('title',tableHead.item1_tt);
+		$('#sortHead2').attr('title',tableHead.item2_tt);
+		$('#sortHead3').attr('title',tableHead.item3_tt);
+		$('#sortHead4').attr('title',tableHead.item4_tt);
+		$('#sortHead6').attr('title',tableHead.item6_tt);
+		
+		$('#search_field').attr('title',otherContent.search);
+		
+		$('#news').attr('title',otherContent.news);
+		
+		if($(document).width() < 800){
+				//no tooltips enabled
+				$("#newsFeedPanel").hide();
+		} else {
+				$(document).tooltip();
+				$('#news').tooltip();
+				$("#left_nav").tooltip({
+					position: { my: "left-10vh center", at: "right center" }
+				});
+				$("#SearchInputGroup").tooltip({
+					position: { my: "center top-83"}
+				});
+				$("#content").tooltip({
+					position: { my: "center top-80", collision: "flipfit" },
+					track: true,
+				});
+		}
+}
+
+
+//returns false if help checkbox ticked
+function helpEnabled(){
+	var val=$("#helpCheckbox").prop('checked');
+	//if(val){ console.log("ja");} else {console.log("nein");}
+	return val;
+}
+
+
+
+function checkHelpEnabled(){
+	if(!helpEnabled()){
+		$(document).tooltip("disable");
+	} else {
+	//all vars in translate.js
+		enableTooltips();
+	
+	}
+}
+
+//
+// 	END tooltips and translation//
+//
+
+
+function sizeAccordion(){
+$("#accordion").accordion({ heightStyle: "content" });
+}
+
+//erzeugen der Input-Felder
+function createReqForm(){
+setBlock(true);
+var body=$('#content');
+var user= getUserName();
+	body.html("<h3 class='marginClass'>"+reqForm.headline+"</h3>\
+				<fieldset>\
+					<div class='col-md-3'><input type='text' class='form-control' name='wann' id='wann' placeholder='Wann?/Bedingung?'></div>\
+					<div class='col-md-2'><select class='form-control' name='muss' id='muss'>\
+						<option>muss</option>\
+						<option>sollte</option>\
+						<option>wird</option>\
+					</select></div>\
+					<div class='col-md-3'><input type='text' class='form-control' name='system' id='system' placeholder='Systemname?'></div>\
+					<div class='col-md-2'><input type='text' class='form-control' name='wem' id='wem' placeholder='wem? (optional)'></div>\
+					<div class='col-md-2'><select class='form-control' name='bieten' id='bieten'>\
+						<option>fähig sein,</option>\
+						<option>die Möglichkeit bieten,</option>\
+						<option> </option>\
+					</select></div>\
+				</fieldset></br>\
+				<fieldset>\
+					<div class='col-md-2'><input type='text' class='form-control' name='objekt'	id='objekt' placeholder='Objekt?'></div>\
+					<div class='col-md-2'><input type='text' class='form-control' name='verb' id='verb' placeholder='Verb?'></div>\
+					<div class='col-md-2'><input type='text' class='form-control' name='identity' id='identity' placeholder='ID?'></div>\
+					<div class='col-md-4'><input type='text' class='form-control' name='relations' id='relations' placeholder='Abhängigkeiten? (optional)'></div>\
+				</fieldset></br>\
+				<fieldset>\
+					<div class='col-md-2'>"+reqForm.prio+"<select id='prio' class='form-control'>\
+													<option>0</option>\
+													<option>1</option>\
+													<option>2</option>\
+													<option>3</option>\
+												</select>\</div>\
+					<div class='col-md-3'>"+reqForm.status+":<select id='status' class='form-control'>\
+													<option>im Backlog</option>\
+													<option>in Bearbeitung</option>\
+													<option>in Testphase</option>\
+													<option>abgeschlossen</option>\
+												</select>\
+					</div>\
+				</fieldset>\
+		<button class='btn btn-success marginClass' id='reg_submit' onClick='insertReq(0)'>"+button.ok+"</button>");
+	
+}
+
+socket.on('doEditReq',function(req){
+var body=$('#content');
+
+var wann, muss, wer, wem, bieten, objekt, verb, priority,p_id,p_rel,p_status;
+wann=req.wann;
+muss=req.muss;
+wer=req.wer;
+wem=req.wem;
+bieten=req.bieten;
+objekt=req.objekt;
+verb=req.verb;
+priority=req.priority;
+p_id=req.p_id;
+p_rel=req.p_rel;
+p_status=req.p_status;
+id=req.id;
+
+body.html("<h3 class='marginClass'>"+editForm.greeting+"</h3>\
+				<fieldset>\
+					<div class='col-md-3'><input type='text' class='form-control' name='wann' id='wann' value='"+wann+"'></div>\
+					<div class='col-md-2'><select class='form-control' name='muss' id='muss'>\
+						<option>"+muss+"</option>\
+						<option>muss</option>\
+						<option>sollte</option>\
+						<option>wird</option>\
+					</select></div>\
+					<div class='col-md-3'><input type='text' class='form-control' name='system' id='system' value='"+wer+"'></div>\
+					<div class='col-md-2'><input type='text' class='form-control' name='wem' id='wem' value='"+wem+"'></div>\
+					<div class='col-md-2'><select class='form-control' name='bieten' id='bieten'>\
+						<option>"+bieten+"</option>\
+						<option>fähig sein,</option>\
+						<option>die Möglichkeit bieten,</option>\
+						<option> </option>\
+					</select></div>\
+				</fieldset></br>\
+				<fieldset>\
+					<div class='col-md-2'><input type='text' class='form-control' name='objekt'	id='objekt' value='"+objekt+"'></div>\
+					<div class='col-md-2'><input type='text' class='form-control' name='verb' id='verb'  value='"+verb+"'></div>\
+					<div class='col-md-2'><input type='text' class='form-control' name='identity' id='identity'  value='"+p_id+"'></div>\
+					<div class='col-md-3'><input type='text' class='form-control' name='relations' id='relations'  value='"+p_rel+"'></div>\
+				</fieldset></br>\
+				<fieldset>\
+					<div class='col-md-2'>"+editForm.prio+"<select id='prio' class='form-control'>\
+													<option>"+priority+"</option>\
+													<option>0</option>\
+													<option>1</option>\
+													<option>2</option>\
+													<option>3</option>\
+												</select></div>\
+					<div class='col-md-3'>Status:<select id='status' class='form-control'>\
+						<option>"+p_status+"</option>\
+						<option>im Backlog</option>\
+						<option>in Bearbeitung</option>\
+						<option>in Testphase</option>\
+						<option>abgeschlossen</option>\
+					</select>\
+					</div>\
+				</fieldset>\
+				<button class='btn btn-success marginClass' id='reg_submit' onClick='edit("+id+")'>"+button.ok+"</button>");
+});
+
+//Formular für Anforderung bearbeiten
+function createEditForm(id){
+	setBlock(true);
+	var user= getUserName();
+	socket.emit('doEditReq',{user: user, id: id});
+}
+var patchnotes = "\
+	<h3><span style='font-style:bold'>Version 1.1b</span></h3>\
+	<div><ul>\
+		<li>Suchfunktion verbessert:</li><ul>\
+			<li>Suche nach Wörtern getrennt durch Leertaste optimiert</li>\
+			<li>Suche nach exakten Wortstücken begrenz durch / ist nun möglich.</li>\
+		</ul></br>\
+		<li>Allgemeine Änderungen:</li><ul>\
+			<li>Es ist nun der download als csv oder excel Datei möglich.</li>\
+		</ul></br>\
+		<li>Visuelle Änderungen:</li><ul>\
+			<li>Ein Hilfebutton neben dem Suchfeld zeigt zusätzliche Informationen</li>\
+			<li>Ladeanimation hinzugefügt</li>\
+		</ul></br>\
+		<li>Bugfixes:</li><ul>\
+			<li>Fehlende Übersetzungen hinzugefügt</li>\
+		</ul>\
+	</ul></div>\
+	\
+	<h3><span style='font-style:bold'>Version 1.1a</span></h3>\
+	<div><ul>\
+		<li>Allgemeine Änderungen:</li><ul>\
+			<li>Website kann nun auf Englisch umgestellt werden</li>\
+			<li>Ein Klick auf die Email eines Teammitgliedes öffnet direkt eine Vorlage im Standardemailprogramm</li>\
+			<li>Tooltips können jetzt deaktiviert werden</li>\
+		</ul></br>\
+		<li>Visuelle Änderungen:</li><ul>\
+			<li>Die aktuelle Uhrzeit wird nun rechts oben angezeigt</li>\
+			<li>Feed-Nachrichten beinhalten jetzt ob jemand Anderes oder man selbst eine Aktion durchgeführt hat</li>\
+			<li>Beim Laden von vielen Anforderungen wird die Maus nun zum Ladesymbol</li>\
+		</ul></br>\
+		<li>Bugfixes:</li><ul>\
+			<li>Uhrzeit ist jetzt auch bei 0-9 jeweils zweistellig</li>\
+			<li>Der Footer ist nun immer korrekt am unteren Bildschirmrand</li>\
+		</ul>\
+	</ul></div>\
+	\
+	<h3><span style='font-style:bold'>Version 1.0</span></h3>\
+	<div><ul>\
+		<li>Allgemeine Änderungen:</li><ul>\
+			<li>Möglichkeit zur Abfrage der Nutzerinformationen von Teammitgliedern</li>\
+			<li>Inputfeld für Name wird beim Laden der Loginseite automatisch ausgewählt</li>\
+			<li>Versionsübersicht hinzugefügt</li>\
+		</ul></br>\
+		<li>Bugfixes:</li><ul>\
+			<li>Suche setzt Menüpunkt Home jetzt als aktiv</li>\
+			<li>Abkürzungspunkt vom Monat May entfernt</li>\
+		</ul>\
+	</ul></div>\
+	\
+	<h3>Version 0.9</h3>\
+	<div><ul>\
+		<li>Allgemeine Änderungen:</li><ul>\
+			<li>Feed-Performance verbessert</li>\
+			<li>Feed-Nachricht bei neuen Anforderungen geändert</li>\
+			<li>Feed-Nachricht bei bearbeiteter Anforderung hinzugefügt</li>\
+			<li>Link zu Kontaktmöglichkeiten hinzugefügt</li>\
+		</ul></br>\
+		<li>Visuelle Änderungen:</li><ul>\
+			<li>Stern bei neuen Feeds hinzugefügt</li>\
+			<li>Anforderungen sind bei kleinem Bildschirm scrollbar</li>\
+		</ul>\
+	</ul></div>\
+	\
+	<h3>Version 0.8</h3>\
+	<div><ul>\
+		<li>News-Feed hinzugefügt:</li><ul>\
+			<li>Information bei neuen / gelöschten Anforderungen</li>\
+			<li>Feed wird nach nach Aktualisierung des Dashboards zurückgesetzt</li>\
+		</ul></br>\
+		<li>Visuelle Änderungen:</li><ul>\
+			<li>Login und Dashboard für Mobilgeräte angepasst</li>\
+			<li>Neue Positionen für Tooltips</li>\
+		</ul></br>\
+		<li>Bugfixes:</li><ul>\
+			<li>Bugfix bezüglich Uhrzeitanzeige</li>\
+		</ul>\
+	</ul></div>\
+	\
+	<h3>Version 0.7</h3>\
+	<div><ul>\
+		<li>Allgemeine Änderungen:</li><ul>\
+			<li>Zu Anforderungen wird der Zeitpunkt der letzten Änderungen angezeigt</li>\
+			<li>Automatische Suche nach Änderungen von Anforderungen</li>\
+			<li>Anzahl der Änderungen wird dargestellt</li>\
+		</ul></br>\
+		<li>Visuelle Änderungen:</li><ul>\
+			<li>Aussehen des Suche-Buttons geändert</li>\
+		</ul></br>\
+		<li>Bugfixes:</li><ul>\
+			<li>Bugfix bezüglich Menüdarstellung</li>\
+		</ul>\
+	</ul></div>\
+	\
+	<h3>Version 0.6</h3>\
+	<div><ul>\
+		<li>Allgemeine Änderungen:</li><ul>\
+			<li>Geschwindigkeit verbessert</li>\
+		</ul></br>\
+		<li>Visuelle Änderungen:</li><ul>\
+			<li>Logo geändert</li>\
+		</ul></br>\
+		<li>Bugfixes:</li><ul>\
+			<li>Bugfix bezüglich der Edit-Funktion</li>\
+			<li>Bugfix bezüglich der Tabellendarstellung der Anforderungen</li>\
+		</ul>\
+	</ul></div>\
+	<h3>Version 0.5</h3>\
+	<div><ul>\
+		<li>Teams hinzugefügt:</li>\
+		<ul>\
+			<li>Teams erstellen, bearbeiten und löschen</li>\
+			<li>Eigenen Teams beitreten oder verlassen</li>\
+			<li>Mitglieder zu Teams hinzufügen</li>\
+		</ul></br>\
+		<li>Visuelle Änderungen:</li><ul>\
+			<li>Anzeige von Tooltips hinzugefügt</li>\
+		</ul></br>\
+		<li>Bugfixes:</li><ul>\
+			<li>Bugfix bezüglich Menüdarstellung</li>\
+		</ul>\
+	</ul></div>\
+	";
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////DASHBOARD//////END//////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////TEAM//////START/////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function loadTeamOptions(){
+	sizeAccordion();
+	refreshTeamData();
+	getMyGroups();
+}
+
+var teamname;
+var justEnteredTeam = false;
+
+socket.on('teamChanged',function(data){
+	 insertIntoFeed("Team wurde geändert");
+});
+
+socket.on('createTeam',function(code){
+	//console.log(code);
+	var mess;
+	switch (code) {
+		case 0: mess = createTeam.mess0; break;
+		case 1: mess = createTeam.mess1; break;
+	}
+	//teams neu laden --> meine Teams
+	refreshTeamData(true);	
+	$("#team_name").val('');	
+	window.setTimeout(function(){$("#head_modal_dash_team").text(mess).slideDown(500).delay(1000).slideUp(500);},3000);
+	socket.emit('insertTeamOwner',{user:getUserName(), team: teamname});
+});
+
+socket.on('insertTeamOwner', function(data){
+	console.log(data);
+	var mess2;
+	switch (data) {
+		case 0: mess2 = insertGroupOwner.mess0; break;
+		case 1: mess2 = insertGroupOwner.mess1; break;
+	}
+	//window.setTimeout(function(){$("#head_modal_dash_team").text(mess2).slideDown(500).delay(1000).slideUp(500);},3000);
+	refreshTeamData(true);	
+});
+
+socket.on('addTeamMember',function(data){
+var mess;
+console.log(data);
+	switch (data.code) {
+		case 0: mess = addMember.mess0+" "+data.team; break;
+		case 1: mess = addMember.mess1; break;
+		case 2: mess = addMember.mess2; break;
+		case 3: mess = addMember.mess3; break;
+	}
+	
+	refreshTeamData();
+	$("#head_modal_dash_team").text(data.user+" "+mess).slideDown(500).delay(3000).slideUp(500);	
+	
+	
+});
+
+//Neues Team erstellen
+function createTeam(){
+	teamname = $("#team_name").val();	
+	if (teamname != ""){
+		socket.emit('createTeam',{user: getUserName(), team: teamname});
+	} else {
+		$("#head_modal_dash_team").text(createTeam.empty).slideDown(500).delay(2000).slideUp(500);	
+	}
+}
+
+socket.on('getMyGroups',function(groups){
+	var myTeams = groups[0];
+	var memberOf = groups[1];
+	var userIsCreatorOf = groups[2];
+	var user = groups[3];
+	var teams = "";
+	
+	console.log(groups);
+	for(var i = 0; i < myTeams.length; i++){
+		//wenn elemente (teams) im rückgabeobjekt enthalten sind, führe nachfolgendes aus
+		curTeam=myTeams[i].name;
+		curTeamID=myTeams[i].id;
+		
+		
+		
+		
+		//wenn user aktuell kein member irgendeines teams -> zeichne 'team beitreten' button
+		if(memberOf == ""){
+			teams+="<tr>\
+					<th id='team"+curTeamID+"'>"+curTeam+"</th>\
+					<th></th>\
+					<th class='req-btn'>\
+						<button  class='btn btn-default' data-toggle='modal' data-target='#modal_editTeam' onClick='editTeam("+curTeamID+")' aria-label='Left Align'>\
+							<span class='glyphicon glyphicon-pencil' aria-hidden='true'></span>\
+						</button>\
+						<button  class='btn btn-default' onClick='confirmTeamRemoval("+curTeamID+")' aria-label='Right Align'>\
+							<span class='glyphicon glyphicon-trash' aria-hidden='true'></span>\
+						</button>\
+						<button class='btn btn-default' onClick='intoTeam("+curTeamID+")' aria-label='Right Align'>\
+							<span class='glyphicon glyphicon-plus' aria-hidden='true'></span>\
+						</button>\
+					</th>\
+					</tr>";	
+		//wenn aktueller teamname == teamname, in dem nutzer mitglied ist, dann erstelle noch zusätzlich einen 'leave team' button
+		} else if (curTeam == memberOf){
+		
+		//Übersetzung muss hier gemacht werden, da das DOM bei klick auf englisch/deutsch noch 
+					teams+="<tr>\
+					<th id='team"+curTeamID+"'>"+curTeam+"</th>\
+					<th>"+modal_team.tbl_text+"</th>\
+					<th class='req-btn'>\
+						<button  class='btn btn-default' data-toggle='modal' data-target='#modal_editTeam' onClick='editTeam("+curTeamID+")' aria-label='Left Align'>\
+							<span class='glyphicon glyphicon-pencil' aria-hidden='true'></span>\
+						</button>\
+						<button  class='btn btn-default' onClick='confirmTeamRemoval("+curTeamID+")' aria-label='Right Align'>\
+							<span class='glyphicon glyphicon-trash' aria-hidden='true'></span>\
+						</button>\
+						<button class='btn btn-default' onClick='leaveTeam()' aria-label='Right Align'>\
+							<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>\
+						</button>\
+					</th>\
+					</tr>";	
+								
+					//überschrift anpassen
+						$("#headline_dashboard").text(otherContent.head_dash2+curTeam);
+
+						//bei teams, die der user erstellt hat, in welchen er aber nicht mitglied ist
+		} else {
+					teams+="<tr>\
+					<th id='team"+curTeamID+"'>"+curTeam+"</th>\
+					<th></th>\
+					<th class='req-btn'>\
+						<button class='btn btn-default' data-toggle='modal' data-target='#modal_editTeam' onClick='editTeam("+curTeamID+")' aria-label='Left Align'>\
+							<span class='glyphicon glyphicon-pencil' aria-hidden='true'></span>\
+						</button>\
+						<button class='btn btn-default' onClick='confirmTeamRemoval("+curTeamID+")' aria-label='Right Align'>\
+							<span class='glyphicon glyphicon-trash' aria-hidden='true'></span>\
+						</button>\
+					</th>\
+					</tr>";	
+		}		
+	}
+	
+	//Übersetzung muss hier gemacht werden, da das DOM bei klick auf englisch/deutsch noch 
+			
+			$("#content_team").html("<table class='table'><thead style='background-color:#E6E6E6'>\
+						<tr>\
+							<th class='col-md-4'>"+modal_team.tbl1+"</th>\
+							<th class='col-md-5'></th>\
+							<th class='col-md-3'>"+modal_team.tbl2+"</th>\
+						</tr></thead>\
+						<tbody>\
+							"+teams+"\
+						</tbody></table>");						
+	
+
+});
+	
+	
+
+			
+			
+
+//Teams für den User laden
+function getMyGroups(){
+var user = getUserName();
+var curTeam;
+var teams = "Noch kein Team vorhanden";
+socket.emit('getMyGroups',getUserName());
+	
+}
+
+socket.on('leaveTeam',function(code){
+	var mess;
+	switch(code){
+		case 0: mess = leaveTeam.mess0; break;
+		case 1: mess = leaveTeam.mess1; break;
+	}
+	refreshTeamData(true);
+	$("#head_modal_dash_team").text(mess).slideDown(500).delay(2000).slideUp(500);
+
+});
+
+//Team verlassen
+function leaveTeam(){
+	var user = getUserName();
+	socket.emit('leaveTeam',user);
+}
+
+socket.on('intoTeam',function(data){
+	console.log("intoTeam");
+	var mess;
+	switch(data.code){
+		case 0: mess = intoTeam.mess0; break;
+		case 1: mess = intoTeam.mess1; break;
+	}
+	refreshTeamData(true);
+	$("#head_modal_dash_team").text(mess).slideDown(500).delay(2000).slideUp(500);
+	socket.emit('teamChanged',{user: getUserName(), teamID: data.teamid});
+});
+
+function intoTeam(team_id){
+	var user = getUserName();
+	socket.emit('intoTeam',{user:user,teamid:team_id});
+}
+
+//Team (&Anforderungen) löschen bestätigen
+function confirmTeamRemoval(team_id){
+$('#team_modal').hide();
+$( "#dialog" ).dialog({
+		resizable: false,
+		height: 140,
+		width: 700,
+		title: team.del,
+		modal: true,
+		bgiframe: true,
+		buttons: {
+			"OK": function() {
+				deleteTeam(team_id);
+				$( this ).dialog( "close" );
+				$('#team_modal').show();
+			},
+			"Cancel": function() {
+				$( this ).dialog( "close" );
+				$('#team_modal').show();
+			}
+		}
+	});
+}
+socket.on('deleteTeam',function(code){
+	console.log("delete answer");
+	var mess;
+	switch (code) {
+				case 0: mess = deleteTeam.mess0; break;
+				case 1: mess = deleteTeam.mess1; break;
+				case 2: mess = deleteTeam.mess2; break;
+				case 3: mess = deleteTeam.mess3; break;
+	}
+	refreshTeamData();
+	$("#head_modal_dash_team").text(mess).slideDown(500).delay(2000).slideUp(500);
+	getRequirements();
+});
+
+function deleteTeam(team_id){
+	var user = getUserName();
+	socket.emit('deleteTeam',{user: user,teamid:team_id});
+}
+
+socket.on('getTeamDropdown',function(teams){
+console.log("dropdown");
+	var string="";
+	if (teams != null) {
+		for(var i = 0; i < teams.length; i++){
+			curTeam=teams[i].name;
+			string += "<option>"+curTeam+"</option>";
+		}
+	}				
+	$("#team_list").html(
+		"<select class='form-control' id='team_dropdown'>"+string+"</select>"
+	);
+});
+
+function refreshTeamDropdown(){
+//füllt das dropdown in [team]->[mitglieder hinzufügen] mit den teams des users
+var body = $("#team_list");
+var user = getUserName();
+
+socket.emit('getTeamDropdown',getUserName());
+}
+
+function refreshTeamData(opt){
+	//hier alle funktionen rein, die abhängig von den ausgelesenen teams sind
+		$("#headline_dashboard").text("");
+
+	refreshTeamDropdown();
+	getMyGroups();
+	if (opt){	
+		getRequirements();
+	}
+}
+
+//User zum Team hinzufügen
+function addTeamMember(){
+	var newMember = $("#team_user").val();
+	var team = 	$("#team_list option:selected" ).text();
+	socket.emit('addTeamMember',{user: newMember,team: team});
+}
+
+socket.on('deleteUserFromTeam',function(data){
+var mess;
+	switch(data.code){
+		case 0: mess=deleteUserFromTeam.mess0;break;
+		case 1: mess=deleteUserFromTeam.mess1;break;
+	}
+	$("#head_modal_dash_team_edit").text(mess).slideDown(500).delay(2000).slideUp(500);
+	//aktualisiert die ansicht im editier modal
+	editTeam(data.teamid);
+});
+
+function deleteUserFromTeam(userID,teamID){
+	socket.emit('deleteUserFromTeam',{id: userID,teamid:teamID});
+}
+
+socket.on('getMembers',function(members){
+	var body = $("#content_editTeam");
+	body.html("");
+	var mems ="";
+	if (members != null){
+		for(var i = 0; i < members.length; i++){					
+			curUser = members[i].username;
+			curUserID = members[i].id;
+			mems+="<tr>\
+						<th id='user"+curUserID+"'>"+curUser+"</th>\
+						<th></th>\
+						<th class='req-btn'>\
+							<button class='btn btn-default' data-toggle='modal' data-target='#modal_userData' onClick='showUserData("+curUserID+")' aria-label='Right Align'>\
+								<span class='glyphicon glyphicon-info-sign' aria-hidden='true'></span>\
+							</button>\
+							<button class='btn btn-default' onClick='deleteUserFromTeam("+curUserID+","+members[i].teamid+")' aria-label='Right Align'>\
+								<span class='glyphicon glyphicon-trash' aria-hidden='true'></span>\
+							</button>\
+						</th>\
+					</tr>";	
+		}
+		body.html(
+			"<table class='table'>\
+				<thead style='background-color:#E6E6E6'>\
+					<tr>\
+						<th class='col-md-4'>"+modal_editTeam.member+"</th>\
+						<th class='col-md-5'></th>\
+						<th class='col-md-3'>"+modal_editTeam.option+"</th>\
+					</tr>\
+					</thead>\
+					<tbody>	"+mems+"\
+					</tbody>\
+				</table>"		
+		);
+	}
+});
+
+function editTeam(teamID){
+	socket.emit('getMembers',teamID);
+}
+
+function placeholder(){
+//für funktionen, die eine funktion als param benötigen
+//aber diese für den jeweiligen zweck undienlich ist.
+}
+socket.on('getUserInfos',function(infos){
+	var name=infos.username;
+	var mail=infos.email;
+	var body=$("#content_userData");
+			
+			//Übersetzung muss hier gemacht werden, da das DOM bei klick auf englisch/deutsch noch nicht existiert!!!
+			
+	body.html("<div class='row'>\
+				<label class='col-md-3'>"+modal_user.name+"</label><label class='col-md-8'>"+name+"</label><br/>\
+				<label class='col-md-3'>E-Mail:</label>\
+				<label class='col-md-8'>\
+					<a href='mailto:"+mail+"?Subject=Kontakt%20über%20Red:Wire'>"+mail+"</a>\
+				</label><br/>\
+			   </div>");
+});
+function showUserData(userID){
+	socket.emit('getUserInfos',userID);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////TEAM//////END///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////USER//////START/////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var sessionID;
+
+
+
+function getParameter(param){
+    var url = window.location.search.substring(1);
+    var variables = url.split('&');
+    for (var i = 0; i < variables.length; i++) 
+    {
+        var varName = variables[i].split('=');
+        if (varName[0] == param) 
+        {
+            return varName[1];
+        }
+    }
+}   
+
+function setArrayLength(val){
+var arr = JSON.parse(localStorage.getItem("array"));
+arr.length=val;
+localStorage.setItem("array", JSON.stringify(arr));
+}
+
+function getArrayLength(){
+var arr = JSON.parse(localStorage.getItem("array"));
+return arr.length;
+}
+
+function Length(){
+var arr = JSON.parse(localStorage.getItem("array"));
+return arr.length;
+}
+
+
+function createUser(name){
+var user;
+sessionID = Date.now();
+user= name;
+//objekt user wird in den lokalen datenstream übertragen, um überall verfügbar zu sein.
+localStorage.setItem("user"+sessionID, JSON.stringify(user));
+return sessionID;
+}
+
+function getUserName(){
+var user;
+if (window.location.pathname.search("dash") != -1){	 
+	 user = JSON.parse(localStorage.getItem("user"+getParameter("session")));
+} else if (window.location.pathname.search("admin") != -1){
+		user = JSON.parse(localStorage.getItem("user"+getParameter("session")));
+	}
+else {	 user = JSON.parse(localStorage.getItem("user"+sessionID));
+}
+return user; 
+}
+
+function redirectToDashboard(){
+	if (getUserName() == 'admin'){
+		window.location="adminpage.html?session="+sessionID;
+	} else {
+		window.location="dashboard_de.php?session="+sessionID;
+	}
+}
+
+function logOut(){
+	localStorage.removeItem("user"+getParameter("session"));
+	location.replace("index.php");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////USER//////END///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
