@@ -5,28 +5,35 @@ var socket = io.connect('http://localhost:3000');
 var feedEmpty=true;
 var blocked=false;
 var oldActive;
-    
 
+switchToDE();
 $(document).ready(function(){
-	getMyGroups();
+	
 	setBlock(false);
+	
 	$("#read").hide();
-	$("#error").hide();
-	$("#accordion").accordion({collapsible: true});
-	$("#patchnotes").html(patchnotes);
-	$("#chooseDownload").hide();
-	$("#patchnotes").accordion({collapsible: true});
-	$("#dialog_team_modal").hide();
-	//seite ist auch in adminpage eingebunden
-	//TT sollen nur auf dashboard sein
-	if(window.location.pathname.search("admin") == -1 ){
-		enableTooltips();
-	}
-
 	switchToDE();
+	
+	//function will fail, if something is not available
+	//so only do certain actions on dashboard, because it's not available on index/admin
+	if(window.location.pathname.search("dash") != -1 ){
 
+		$("#accordion").accordion({collapsible: true});
+		$("#patchnotes").html(patchnotes);
+		$("#chooseDownload").hide();
+		$("#patchnotes").accordion({collapsible: true});
+		$("#dialog_team_modal").hide();
+		$("#dialog").hide();
+		$("#error").hide();
+		window.setInterval(function(){clearFeed();},5000);
+		getMyGroups();
+		enableTooltips();
+		refreshTeamData();
+	}
+});
 
- socket.on('connect',function() {
+if(window.location.pathname.search("dash") != -1 ){
+socket.on('connect',function() {
 	var id = socket.io.engine.id;
       console.log('Client '+id+' has connected to the server!');
     });
@@ -48,6 +55,7 @@ $(document).ready(function(){
       var mess = user+reqForm.feed_create;
 	  insertIntoFeed(mess);
 	  if(isBlocked() == "false"){ getRequirements();}
+	  console.log("hey, a new requirement!");
 	});
 	
 	 socket.on('reqFail',function() {
@@ -100,18 +108,9 @@ $(document).ready(function(){
 		if ((mess.search("Fehler") == -1) && (mess.search("Error") == -1) ){ window.setTimeout(function(){$('#profil').modal('hide'); }, 2000);};
 	});
 	
-	$("#error").hide();
-	$("#dialog").hide();
-	refreshTeamData();
 
     window.setInterval(function(){
 	checkHelpEnabled();},3000);
-	
-	
-		
-	window.setInterval(function(){
-		clearFeed();
-	},5000);
 		
 	$(window).load(function() {
 		getRequirements();
@@ -153,6 +152,10 @@ $(document).ready(function(){
 		event.stopPropagation();
 	});
 		
+	/////////////////////////
+	//	KEY LISTENERS END  //
+	/////////////////////////	
+		
 	//navlist anpassungen nach Modal
 	$('#main-nav li a').on('click', function() {
 		oldActive = $(this).parent().parent().find('.active');
@@ -169,12 +172,7 @@ $(document).ready(function(){
 		$('#main-nav').find('.active').removeClass('active');
 		oldActive.addClass('active');
 	});
-	
-	/////////////////////////
-	//	KEY LISTENERS END  //
-	/////////////////////////
-	
-});
+}	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////LOGIN////////START//////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,6 +217,11 @@ var email=$("#reg_email").val();
 console.log(username+" "+password+" "+password_repeat+" "+email);
 socket.emit('registerUser', {user: username,pw:password,pw2:password_repeat,mail:email});
 
+
+$("#reg_user").val("");
+$("#reg_pw").val("");
+$("#reg_pw2").val("");
+$("#reg_email").val("");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
