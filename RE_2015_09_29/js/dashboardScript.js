@@ -29,6 +29,22 @@ $(document).ready(function(){
 		getMyGroups();
 		enableTooltips();
 		refreshTeamData();
+		
+		$('#main-nav li a').on('click', function() {
+		oldActive = $(this).parent().parent().find('.active');
+		if($(this).attr('id') != "downloadNav") {
+			$(this).parent().parent().find('.active').removeClass('active');
+			$(this).parent().addClass('active');
+		}
+	});
+	$("#profil").on('hidden.bs.modal', function(){
+		$('#main-nav').find('.active').removeClass('active');
+		oldActive.addClass('active');
+	});
+	$("#team_modal").on('hidden.bs.modal', function(){
+		$('#main-nav').find('.active').removeClass('active');
+		oldActive.addClass('active');
+	});
 	}
 });
 
@@ -155,23 +171,6 @@ socket.on('connect',function() {
 	/////////////////////////
 	//	KEY LISTENERS END  //
 	/////////////////////////	
-		
-	//navlist anpassungen nach Modal
-	$('#main-nav li a').on('click', function() {
-		oldActive = $(this).parent().parent().find('.active');
-		if($(this).attr('id') != "downloadNav") {
-			$(this).parent().parent().find('.active').removeClass('active');
-			$(this).parent().addClass('active');
-		}
-	});
-	$("#profil").on('hidden.bs.modal', function(){
-		$('#main-nav').find('.active').removeClass('active');
-		oldActive.addClass('active');
-	});
-	$("#team_modal").on('hidden.bs.modal', function(){
-		$('#main-nav').find('.active').removeClass('active');
-		oldActive.addClass('active');
-	});
 }	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -679,6 +678,8 @@ function enableTooltips(){
 		$('#l4').attr('title',menu.item4_tt);
 		$('#l5').attr('title',menu.item5_tt);
 		$('#l6').attr('title',menu.item6_tt);
+		$('#l7').attr('title',menu.item7_tt);
+
 	
 		$('#sortHead1').attr('title',tableHead.item1_tt);
 		$('#sortHead2').attr('title',tableHead.item2_tt);
@@ -763,7 +764,8 @@ var user= getUserName();
 					<div class='col-md-2'><input type='text' class='form-control' name='objekt'	id='objekt' placeholder='Objekt?'></div>\
 					<div class='col-md-2'><input type='text' class='form-control' name='verb' id='verb' placeholder='Verb?'></div>\
 					<div class='col-md-2'><input type='text' class='form-control' name='identity' id='identity' placeholder='ID?'></div>\
-					<div class='col-md-4'><input type='text' class='form-control' name='relations' id='relations' placeholder='Abhängigkeiten? (optional)'></div>\
+					<div class='col-md-3'><input type='text' class='form-control' name='relations' id='relations' placeholder='Abhängigkeiten? (optional)'></div>\
+					<div class='col-md-2' id='categoryForm'></div>\
 				</fieldset></br>\
 				<fieldset>\
 					<div class='col-md-2'>"+reqForm.prio+"<select id='prio' class='form-control'>\
@@ -974,6 +976,20 @@ var patchnotes = "\
 		</ul>\
 	</ul></div>\
 	";
+	
+	
+function createCategory(){
+	var body=$('#content');
+	body.html("<fieldset>\
+					<div class='col-md-5'><input class='form-control' type='text' placeholder='Neue Kategorie' id='catField' ></input></div>\
+					<div class='col-md-2'><button onClick='writeCategory()' class='btn btn-success'>OK</button></div>\
+			   </fieldset>");
+}	
+
+function writeCategory(){
+var category = $('#catField').val();
+
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////DASHBOARD//////END//////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

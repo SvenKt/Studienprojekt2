@@ -52,6 +52,7 @@
 				<ul id="main-nav" class="nav nav-pills nav-stacked">
 					<li id="l1" role="presentation" class="navlist active clickable"><a onClick="getRequirements()" id="home" ></a></li>
 					<li id="l2" class="navlist clickable"role="presentation"><a onClick="createReqForm()" id="create" ></a></li>
+					<li id="l7" class="navlist clickable"role="presentation"><a onClick="createCategory()" id="catForm" ></a></li>
 					<li id="l3" class="navlist clickable" role="presentation"><a id="team" data-toggle="modal" data-target="#team_modal" onClick="loadTeamOptions()"  ></a></li>
 					<li id="l4" class="navlist clickable" role="presentation"><a data-toggle="modal" id="prof"  data-target="#profil" ></a></li>
 					<li id="l5" class="navlist clickable" role="presentation"><a onClick="chooseDownload()" id="downloadNav"></a></li>

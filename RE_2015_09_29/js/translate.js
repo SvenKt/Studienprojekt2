@@ -49,12 +49,14 @@ var menu = {
  item4:"",
  item5:"",
  item6:"",
+ item7:"",
  item1_tt: "",
  item2_tt: "",
  item3_tt: "",
  item4_tt: "",
  item5_tt: "",
- item6_tt: ""
+ item6_tt: "",
+ item7_tt: ""
 }
 
 var tableHead = {
@@ -332,6 +334,7 @@ function defineTranslationVars(lang){
 		menu.item4_tt ='Ändern Sie Ihre persönlichen Informationen';
 		menu.item5_tt ='Laden Sie Ihre Anforderungen als .csv Datei herunter';
 		menu.item6_tt ='Melden Sie sich vom System ab';
+		menu.item7_tt ='Erstellen Sie eine neue Kategorie';
 	
 		tableHead.item1_tt ='Klicken zum Sortieren nach ID';
 		tableHead.item2_tt ='Klicken um alphabetisch zu sortieren';
@@ -353,6 +356,7 @@ function defineTranslationVars(lang){
 		menu.item4="Profil";
 		menu.item5="Download";
 		menu.item6="Logout";
+		menu.item7 ='Kategorie';
 		
 		otherContent.search ='Durchsuchen Sie Ihre Anforderungen';
 		otherContent.helpSearchTitle = 'Nutze Slash (/) für exakte Suche';
@@ -507,6 +511,7 @@ function defineTranslationVars(lang){
 		menu.item4_tt ='change your personal data';
 		menu.item5_tt ='Download your requirements a .csv data';
 		menu.item6_tt ='Logout from the system';
+		menu.item7_tt ='Create a new category';
 	
 		tableHead.item1_tt ='Click for ID sort';
 		tableHead.item2_tt ='Click for alphabetical sort';
@@ -528,6 +533,7 @@ function defineTranslationVars(lang){
 		menu.item4="Profile";
 		menu.item5="Download";
 		menu.item6="Logout";
+		menu.item7="Category";
 		
 		otherContent.search ='Search for matching requirements';
 		otherContent.helpSearchTitle = 'Use slash (/) for exact searching';
@@ -689,6 +695,7 @@ function changeMenuLanguage(){
 	$('#prof').text(menu.item4);
 	$('#downloadNav').text(menu.item5);
 	$('#logt').text(menu.item6);
+	$('#catForm').text(menu.item7);
 	
 	$('#profile_tophead').text(modal_profile.tophead);
 	$('#head_modal_dash').text(modal_profile.headline);
