@@ -7,8 +7,8 @@ var express = require('express')
 
 var db = mysql.createConnection({
     host: 'localhost',
-    user: '',
-	password: '',
+    user: 'reqmanager',
+	password: 'Proskater594',
     database: 'requirement'
 });
 
@@ -24,12 +24,12 @@ db.connect(function(err){
 server.listen(3000);
 
 //dateien aus /public können von server verarbeitet werden
-app.use(express.static('public'));
+app.use(express.static('RE'));
 
 
 //bei aufruf des servers landet user auf /public/socket.html
 app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/public/socket.html');
+  res.sendFile(__dirname + '/RE/bla.html');
 });
 
 
@@ -72,7 +72,7 @@ function deleteUserFromArray(socketid,arr){
 
 io.on('connection', function (socket) {
 
-
+	console.log("connection of new device");
 	//
 	//  LISTENERS	
 	//
@@ -204,23 +204,55 @@ io.on('connection', function (socket) {
 		var socketid=data.socket;
 		var requirementsArr = [];
 		var user=data.user;
-		var query="SELECT  requirements.project_id, requirements.status,  requirements.relations, requirements.id, requirements.requirement, requirements.priority, requirements.timestamp FROM requirements, users WHERE users.username='"+user+"' AND users.team_id=requirements.team_id";
-	
-		if (typeof data.search !== "undefined"){
-			var parts = data.search.split(" ");
-			for(var i=0; i<parts.length;i++){
-				if(parts[i].indexOf("/") != -1){
-					parts[i] = parts[i].replace("/"," ");
-				} 
-				query += " AND requirements.requirement like '%"+parts[i]+"%'";
+		var query="SELECT   project_id, status,  relations, requirements.id as reqid, requirement, priority,  timestamp";
+		var str = "cat_";	
+		var view = data.view;
+		console.log(view);
+		
+		
+		if (typeof data.search != "undefined"){
+			if(data.search.substring(0,str.length) == str){
+				query+=", categories.name, categories.id as catid";
 			}
 		}
+		
+		query+=" FROM requirements";
+	  
+		if (typeof data.search != "undefined"){		  
+			if(data.search.substring(0,str.length) == str){
+				query+=" INNER JOIN categories on requirements.category = categories.id";
+			}
+		}		
+			query+=" INNER JOIN users on requirements.team_id=users.team_id\
+					 WHERE users.username='"+user+"'";	
+		
+		if (typeof data.search != "undefined"){		
+			if(data.search.substring(0,str.length) == str){
+				query+=" AND categories.name = '"+data.search.split("_")[1]+"'"; 
+			} 
+		}
+		
+		if (typeof data.search != "undefined"){
+			if(data.search.substring(0,str.length) != str){
+				var parts = data.search.split(" ");
+				for(var i=0; i<parts.length;i++){
+					if(parts[i].indexOf("/") != -1){
+						parts[i] = parts[i].replace("/"," ");
+					} 
+					query += " AND requirements.requirement like '%"+parts[i]+"%'";
+				}
+			}
+		}
+		
 		query += ";";
+
 		var requirements = db.query(query,  function(err, rows, fields){
 			if (err) throw err;
 			for(var i=0;i<rows.length;i++){
 				requirementsArr.push(rows[i]);
+				console.log(rows[i]);
 			}
+			//console.log(requirementsArr);
 			socket.emit('getRequirements',requirementsArr);
 		});
 	});
@@ -259,8 +291,27 @@ io.on('connection', function (socket) {
 		}
 	});
 	
+	socket.on('getCatID',function(data){
+		if (data.category != ""){
+		var newData=data;
+			var query="select IFNULL(id ,-1) from categories where name='"+data.category+"';";
+			var requirements = db.query(query, function(err,rows,fields){
+				if (err) {socket.emit('reqFail',1); return;}
+				 if(typeof rows[0] !== "undefined"){
+					 newData.category=rows[0].id;
+					 console.log(newData);
+					 socket.emit('getCatID',newData);
+				 } else {
+					 socket.emit('reqFail',1);
+				 }
+			});
+		} else {
+			socket.emit("reqFail",1);
+			}
+	});
+	
 	socket.on('insertReq', function(data){
-		var teamid;
+		var teamid = "";
 		var userid;
 		
 		for(var i=0;i<users.length;i++){
@@ -271,11 +322,11 @@ io.on('connection', function (socket) {
 			}
 		}
 		
-		if(teamid != null){
-		
-			var query="insert into requirements (requirement, priority, project_id, status, relations ,owner_id, team_id, timestamp) values ('"+data.req+"', '"+data.prio+"','"+data.id+"','"+data.status+"','"+data.relations+"','"+userid+"','"+teamid+"','"+data.currentTime+"');";
+		if(teamid !== null){
+			if(data.category != null){
+			var query="insert into requirements (requirement, priority, project_id, status, relations ,owner_id, team_id, timestamp, category) values ('"+data.req+"', '"+data.prio+"','"+data.id+"','"+data.status+"','"+data.relations+"','"+userid+"','"+teamid+"','"+data.currentTime+"','"+data.category+"');";
 			var requirements = db.query(query, function(err){
-				if (err) throw err;
+				if (err) {socket.emit('reqFail',1);}
 			});
 		
 			//console.log("Neue Anforderung");
@@ -301,8 +352,9 @@ io.on('connection', function (socket) {
 					io.to(members[i].socket).emit('newReq', data.user);
 				}
 			}
-		
+		 }
 		} else {	
+			console.log(teamid);
 			code=1;
 			socket.emit('reqFail',{code: code});
 		}
@@ -341,38 +393,76 @@ io.on('connection', function (socket) {
 		});
 	});
 	
+	socket.on('createDefaultCategory',function(teamname){
+	
+		var getTeamID = "select id from team where name='"+teamname+"';";
+		var do_getTeamID = db.query(getTeamID, function(err,rows,fields){
+			if (err){throw err;}
+			var teamid = rows[0].id;
+			var query = "insert into categories (name, team_id) values ('uncategorized',"+teamid+");";
+			var do_query = db.query(query, function(err,rows,fields){
+				if (err){throw err;}
+				socket.emit('createDefaultCategory');
+			});
+		});
+	
+	});
+	
 	socket.on('insertTeamOwner', function(data){
-		//console.log(data);
+		console.log(data);
 		
 		
 		var code;
-		var UserID="select team_id from users where username='"+data.user+"';";
+		var UserID="select team_id,id from users where username='"+data.user+"';";
 		var getUserID = db.query(UserID, function(err,rows,fields){
 					if (err) {throw err;  code=1; socket.emit('insertTeamOwner',code);}
 					var userTeamid;
 					userTeamid=rows[0].team_id;
+					var userid = rows[0].id;
 					if(userTeamid == null){
-						//console.log("Insert as Owner");
-					var teamid_query="select id from team where name='"+data.team+"';";
-					var getTeamID = db.query(teamid_query, function(err,rows,fields){
-						if (err) {throw err;  code=2; socket.emit('insertTeamOwner',code);}
-						var teamid = rows[0].id;
-						//console.log(teamid);
-						var insert_query= "update users set team_id="+teamid+" where username='"+data.user+"';"
-						var insertUser = db.query(insert_query, function(err){
-							if (err) {throw err;  code=3; socket.emit('insertTeamOwner',code);}
-							else {
-								for(var i=0;i<users.length;i++){
-									if (users[i].name==data.user){
-										users[i].teamID=teamid;
-									}
-								}
-								 code=0; socket.emit('insertTeamOwner',code);
-							}
-						});
-					});
+						console.log(data.action);
+
+							//console.log("Insert as Owner");
+							var teamid_query="select id from team where name='"+data.team+"';";
+							var getTeamID = db.query(teamid_query, function(err,rows,fields){
+								if (err) {throw err;  code=2; socket.emit('insertTeamOwner',code);}
+								var teamid = rows[0].id;
+								//console.log(teamid);
+								var insert_query= "update users set team_id="+teamid+" where username='"+data.user+"';"
+								var insertUser = db.query(insert_query, function(err){
+									if (err) {throw err;  code=3; socket.emit('insertTeamOwner',code);}
+								else {
+										for(var i=0;i<users.length;i++){
+											if (users[i].name==data.user){
+												users[i].teamID=teamid;
+											}
+										}
+										console.log("not entering if");
+										code=0; socket.emit('insertTeamOwner',code);
+									}		
+								});
+							});
+						
 					} else {
-					//console.log(userTeamid);
+						if (data.action == 1){
+							var teamid_query="select id from team where name='"+data.team+"';";
+							var getTeamID = db.query(teamid_query, function(err,rows,fields){
+								if (err) {throw err;}
+								var teamid = rows[0].id;
+								//console.log(teamid);
+								var insert_query= "update team set creator_id="+userid+" where id='"+teamid+"';"
+								var insertUser = db.query(insert_query, function(err){
+									var query_del_reqs = "update requirements set owner_id ="+userid+" where owner_id = "+data.userArr[1]+";";
+									var insertUser = db.query(query_del_reqs, function(err){
+									console.log('overwritten!');
+									if (err) {throw err;}
+									code=0; socket.emit('newOwner',{code: code, user: data.userArr});
+									});
+								});
+							});
+						} else {
+							console.log('no action = 1');
+						}
 					}
 		});
 		
@@ -420,6 +510,18 @@ io.on('connection', function (socket) {
 										code=0; 
 										socket.emit('addTeamMember',{user: data.user,code: code,  team: data.team});
 										notifyNewMember(data.user);
+										var query = "select id from team where name='"+data.team+"';";
+										var checkUserIsNotInOtherTeam = db.query(query, function(err,rows,fields){
+											if (err) {throw err;  }
+											var teamid = rows[0].id;		
+											for(var i=0;i<users.length;i++){
+												if(typeof users[i] !== "undefined"){
+													if (users[i].name==data.user){
+														users[i].teamID=teamid;
+													}
+												}
+											}
+										});
 									}
 								});
 							} else {
@@ -668,21 +770,38 @@ var info = {
 socket.on('deleteUserFromTeam',function(data){
 	var userid=data.id;
 	var deletable = true;
+	var members = [];
+	var teamid=data.teamid;
+		
 	for(var i=0;i<users.length;i++){
 		if(typeof users[i] != "undefined"){
-			if (users[i].id==userid){
-				deletable = false;
+			if (users[i].teamID==teamid){
+				members.push(users[i]);
 			}
 		}
-	}
+	}	
+		
+	 for(var i=0;i<users.length;i++){
+		 if(typeof users[i] != "undefined"){
+			 if (users[i].id==userid){
+				users[i].teamID=null;
+				console.log("set users team id = null");
+			 }
+		 }
+	 }
 	
 	if(deletable){
-		var teamid=data.teamid;
+	
+		
 		var query = "update users set team_id=NULL where id='"+userid+"';";
 		var deleteFromTeam =  db.query(query, function(err,rows,fields){
 			if (err) {throw err;}
 			var code = 0; //user erfolgreich gelöscht
-			socket.emit('deleteUserFromTeam',{text: text, teamid: teamid});
+			socket.emit('deleteUserFromTeam',{code: code, teamid: teamid});
+			
+			for(var i= 0; i < members.length; i++){
+				io.to(members[i].socket).emit('gotDeleted');
+			}
 		}); 
 	} else {
 		var code = 1; //"Sie können sich nicht selbst entfernen. Klicken Sie bitte im vorigen Menü auf die X Schaltfläche!";
@@ -740,7 +859,8 @@ socket.on('deleteTeam',function(data){
 					//check if user is either creator or admin,
 					//if not -> no deleting rights
 					if(userID == creatorID || username == 'admin'){
-						if(numerOfUsersInTeam > 1){
+						if(numerOfUsersInTeam >1){
+
 							code=3; //at least 1 remaining user in team
 							
 							//debug
@@ -768,25 +888,43 @@ socket.on('deleteTeam',function(data){
 							var deleteFromTeam =  db.query(query5, function(err,rows,fields){
 								if (err) {throw err;}
 								//delete team
-								var query6 = "delete from team where id="+teamIDtoDelete+";";
-								var deleteTeam =  db.query(query6, function(err,rows,fields){
-									if (err) { throw err;
-											//console.log("error ,code=1");
-											code=1; //konnte nicht gelöscht werden
-										socket.emit('deleteTeam',code);
-									}
-									//debug
-									//console.log("all ok!!! ,code=0");
+								
+								
+								var query_deleteCats = "delete from categories where team_id="+teamIDtoDelete+";";
+								var deleteCats = db.query(query_deleteCats, function(err,rows,fields){
+									if (err) { throw err;}
 									
-									//set teamID in users array = null
-									for(var i=0;i<users.length;i++){
-										if(typeof users[i] != "undefined"){
-											if (users[i].name==username){
-												users[i].teamID=null;
+			
+								
+									var query6 = "delete from team where id="+teamIDtoDelete+";";
+									var deleteTeam =  db.query(query6, function(err,rows,fields){
+										if (err) { throw err;
+												//console.log("error ,code=1");
+												code=1; //konnte nicht gelöscht werden
+											socket.emit('deleteTeam',code);
+										}
+										//debug
+										//console.log("all ok!!! ,code=0");
+									
+										//set teamID in users array = null
+										for(var i=0;i<users.length;i++){
+											if(typeof users[i] != "undefined"){
+												if (users[i].name==username){
+													users[i].teamID=null;
+												}
 											}
 										}
-									}
-									socket.emit('deleteTeam',code); //code=0, alles gut!
+										socket.emit('deleteTeam',code); //code=0, alles gut!
+									
+									
+										//now delete categories
+										var query7 = "delete from categories where team_id="+teamIDtoDelete+";";
+										var deleteTeam =  db.query(query7, function(err,rows,fields){
+										if (err) { throw err;}
+										console.log("deleted teams categories");
+										});
+									});
+									
 								});
 							});
 						}		
@@ -873,6 +1011,17 @@ socket.on('forceDeleteUser', function(id){
 				if (err) {throw err;}//console.log("q1");}
 				//console.log("deleted user");
 				socket.emit('forceDeleteUser');
+				
+			for(var i=0;i<users.length;i++){
+				if(typeof users[i] != "undefined"){
+					if (users[i].id==id){
+						io.to(users[i].socket).emit('disconnected');
+						deleteUserFromArray(users[i].socket,users);
+					}
+				}
+			}
+				
+				
 			});
 		}
 	});
@@ -996,5 +1145,156 @@ socket.on('deleteAllUsersFromTeam',function(data){
 	});
 });
 
+socket.on('submitCategory',function(data){
+	console.log("submit "+data.category);
+	var teamid;
+	var exists=false;
+	var members = [];
+	
+	for(var i=0;i<users.length;i++){
+		if(typeof users[i] != "undefined"){
+			if (users[i].name==data.username){
+				teamid = users[i].teamID;
+			}
+		}
+	}
+	
+	if (teamid != null){
+	
+		var getCats = "select name from categories where team_id="+teamid+";";
+		var getTeamName= db.query(getCats, function(err,rows,fields){
+			if (err) {throw err;}
+			for(var i=0;i<rows.length;i++){
+				if(rows[i].name == data.category){
+					exists=true;
+					socket.emit('submitCategory',3);
+				}
+			} 	if(!exists) {
+					var query = "insert into categories (name, team_id) values ('"+data.category+"',"+teamid+");";
+					var getTeamName= db.query(query, function(err,rows,fields){
+						if (err) {throw err; socket.emit('submitCategory',1);}
+						socket.emit('submitCategory',0);
+						
+						//get members
+						for(var i=0;i<users.length;i++){
+							if (users[i].teamID==teamid){
+								members.push(users[i]);
+							}
+						}
+	
+						//console.log(members);
+	
+						//sendet an alle mitglieder des membersarray eine notification
+						for(var i=0; i< members.length;i++){
+							//console.log("sending to "+members[i].name+"...");
+							io.to(members[i].socket).emit("submitCategory", {username: data.username, code:0});	
+						}
+					});
+				}
+		});	
+	} else {
+		socket.emit('submitCategory',2);
+	}
 });
+
+socket.on('getCategories',function(data){
+	var teamid;
+	var cats = [];
+	//console.log("now acts no. "+data.act);
+	for(var i=0;i<users.length;i++){
+		if(typeof users[i] != "undefined"){
+			if (users[i].name==data.user){
+				teamid = users[i].teamID;
+			}
+		}
+	}
+	
+	var getCats = "select * from categories where team_id="+teamid+";";
+	var exec= db.query(getCats, function(err,rows,fields){
+		if (err) {throw err;}
+		for(var i=0;i<rows.length;i++){
+			cats.push(rows[i]);
+		}
+		switch (data.act){
+			case 0: socket.emit('getCategories',cats); break;
+			case 1: socket.emit('FillCategoryDropdown',cats); break;
+			case 2: socket.emit('fillCategorySelector',cats); break;
+		}
+		
+	});
+});
+
+socket.on('deleteCat',function(data){
+	//console.log("delete cat");
+	var id= data.id;
+	var username = data.username;
+	 var teamid;
+	var members = [];
+	
+	var query2 = "select name from categories where id="+id+";";
+	var exec2= db.query(query2, function(err,rows,fields){
+		if (err) {throw err; }
+		var cat_name=rows[0].name;
+		//console.log(cat_name);
+	
+	
+		var query = "delete from categories where id="+id+";";
+		var exec= db.query(query, function(err,rows,fields){
+			if (err) {socket.emit('deleteCat',{username:username, code: 1});return }
+		
+			//get users team id
+			for(var i=0;i<users.length;i++){
+				//console.log(users[i]);
+				if (users[i].name==username){
+					teamid = users[i].teamID;
+				}
+			}
+				//console.log(teamid);
+
+			//get members
+			for(var i=0;i<users.length;i++){
+				if (users[i].teamID==teamid){
+					members.push(users[i]);
+				}
+			}
+	
+			//console.log(members);
+	
+			//sendet an alle mitglieder des membersarray eine notification
+			for(var i=0; i< members.length;i++){
+				//console.log("sending to "+members[i].name+"...");
+				io.to(members[i].socket).emit("deleteCat", {username: username, code:0});	
+			}
+		
+			var query3 = "update requirements,categories set requirements.category = 'uncategorized' WHERE  requirements.category='"+cat_name+"';";
+			var exec3= db.query(query3, function(err,rows,fields){
+				if (err) {throw err; }
+				//console.log("updated");
+			});
+		});
+	});
+});
+
+socket.on('getEditData',function(id){
+	var query = "select id, name, team_id from categories where id="+id+";";
+	var exec= db.query(query, function(err,rows,fields){
+		if (err) {throw err; }
+		console.log(rows[0].name+" "+rows[0].id);
+		socket.emit('getEditData',{id: rows[0].id, name: rows[0].name, teamid: rows[0].team_id});
+	});
+});
+
+socket.on('submitEdit',function(data){
+var name = data.newName;
+var id= data.id;
+
+var query = "update categories set name='"+name+" 'where id="+id+";";
+	var exec= db.query(query, function(err,rows,fields){
+		if (err) {throw err; }
+		socket.emit('submitEdit');
+	});
+});
+});
+
+
 
