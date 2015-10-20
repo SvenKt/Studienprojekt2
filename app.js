@@ -293,8 +293,19 @@ io.on('connection', function (socket) {
 	
 	socket.on('getCatID',function(data){
 		if (data.category != ""){
+		
+		var teamid;
+		
+		for(var i=0;i<users.length;i++){
+			if (users[i].name==data.user){
+				teamid=users[i].teamID;
+			}
+		}
+		
+		
+		
 		var newData=data;
-			var query="select IFNULL(id ,-1) from categories where name='"+data.category+"';";
+			var query="select id from categories where name='"+data.category+"' AND team_id="+teamid+";";
 			var requirements = db.query(query, function(err,rows,fields){
 				if (err) {socket.emit('reqFail',1); return;}
 				 if(typeof rows[0] !== "undefined"){
@@ -318,7 +329,7 @@ io.on('connection', function (socket) {
 			if (users[i].name==data.user){
 				teamid=users[i].teamID;
 				userid=users[i].id;
-				//console.log(userid+" "+teamid);
+				
 			}
 		}
 		
@@ -326,7 +337,8 @@ io.on('connection', function (socket) {
 			if(data.category != null){
 			var query="insert into requirements (requirement, priority, project_id, status, relations ,owner_id, team_id, timestamp, category) values ('"+data.req+"', '"+data.prio+"','"+data.id+"','"+data.status+"','"+data.relations+"','"+userid+"','"+teamid+"','"+data.currentTime+"','"+data.category+"');";
 			var requirements = db.query(query, function(err){
-				if (err) {socket.emit('reqFail',1);}
+				if (err) {throw err;}
+				console.log(userid+" "+teamid);
 			});
 		
 			//console.log("Neue Anforderung");
@@ -352,7 +364,7 @@ io.on('connection', function (socket) {
 					io.to(members[i].socket).emit('newReq', data.user);
 				}
 			}
-		 }
+			}
 		} else {	
 			console.log(teamid);
 			code=1;
