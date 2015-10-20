@@ -3,12 +3,125 @@ var express = require('express')
 ,   server = require('http').createServer(app)
 ,   mysql = require('mysql')
 ,	md5 = require('js-md5')
-,   io = require('socket.io').listen(server);
+,   io = require('socket.io').listen(server)
+,   fs = require('fs')
+,	nodemailer = require('nodemailer')
+, 	nconf = require('nconf');
+
+
+if (nconf.use('file', { file: 'config.json' })){
+	nconf.load();
+	console.log("config file successfully loaded");
+} else {
+	console.log("no config file found");
+}
+
+
+var mail = {
+	service: nconf.get('Relay_Service'),
+	relayUser: nconf.get('Mail_Relay_User'),
+	relayPass: nconf.get('Mail_Relay_Password'),
+	fromUser: nconf.get('Mail_Sender_Email'),
+	toUser: nconf.get('Mail_Recipient_Email'),
+	enabled: nconf.get('Reports_Enabled'),
+}
+
+
+var transporter = nodemailer.createTransport({
+    service: mail.service,
+    auth: {
+        user: mail.relayUser,
+        pass: mail.relayPass,
+    }
+});
+
+
+
+function getCurTime(){
+	var d = new Date();
+	var hours = d.getHours();
+	var min = d.getMinutes();
+	var sec = d.getSeconds();
+	var day = d.getFullYear()+"_"+(d.getMonth()+1)+"_"+d.getDate();
+	
+	if (min < 10) {
+		min = "0"+min;
+	}
+	
+	return day+"-"+hours+"-"+min+"-"+sec;
+}
+
+
+var date = new Date();
+var dateFormatted = date.getFullYear()+"_"+(date.getMonth()+1)+"_"+date.getDate();
+
+
+var errlog = "errorlog"+getCurTime()+".txt";
+var log = "track"+getCurTime()+".txt";
+
+
+//start to write the logs
+
+fs.writeFile(errlog, "Errorlog file startet on "+getCurTime(), function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("Errorlog file created");
+}); 
+
+
+fs.writeFile(log, "Logfile startet on "+getCurTime(), function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("Trackingfile file created");
+}); 
+
+
+//log functions
+
+function errlog(mess) {
+	fs.appendFile(errlog, "\r\n#"+mess+" at "+getCurTime(), function(err) {
+		if(err) {
+			return console.log(err);
+		}
+	}); 
+}
+
+
+function sendMail(error){
+	fs.appendFile(errlog, "\r\n#"+error+" at "+getCurTime(), function(err) {
+		if(err) {
+			return console.log(err);
+		}
+	}); 
+	if(mail.enabled){
+		transporter.sendMail({
+			from: mail.fromUser,
+			to: mail.toUser,
+			subject: 'Red:Wire is down',
+			text: "Red:Wire's socket server crashed at "+getCurTime()+" due to following error: \n'"+error+"'\n\nPlease backup the logfiles and send it to the developers. Afterwards delete the log files from the directory, they will be recreated by the server. Then restart the server!\n\n\nThis is how you restart the server:\nNavigate to the directory where the app.js server file is located. Then start the server with following command\n\n node app.js",
+		});
+	}
+
+}
+
+
+function traceLog(mess) {
+	fs.appendFile(log, "\r\n#"+mess+" at "+getCurTime(), function(err) {
+		if(err) {
+			return console.log(err);
+		}
+	}); 
+}
+
 
 var db = mysql.createConnection({
     host: 'localhost',
     user: 'reqmanager',
-	password: '',
+	password: 'Proskater594',
     database: 'requirement'
 });
 
@@ -17,7 +130,13 @@ var reqToEdit;
 
 //db connection, wenn error dann log in console
 db.connect(function(err){
-    if (err) {throw err;}//console.log(err)
+    if (err) {
+		sendMail("couldn't connect to database, check credentials");
+		throw err;
+	}//console.log(err)
+	
+	traceLog("connected to database");
+	
 })
 
 //server hört auf port 3000 --> verbindung mittels "localhost:3000"
@@ -58,6 +177,7 @@ function addUserToArray(username,sock){
 			var i = isInArray(sock,users);
 			if (i == -1) users.push(user);
 			////console.log(users);
+			traceLog("{name: "+user.name+", socket: "+user.socket+"} has been added to array");
 	});	
 	
 }
@@ -68,9 +188,74 @@ function deleteUserFromArray(socketid,arr){
 	delete users[i];
 }
 
+function openConfig(){
+console.log("open");
+	fs.writeFile("config.json", "{\n" ,function(err) {
+		if(err) {
+			return console.log(err);
+		}
+	}); 
+}
 
+function writeConfig(attr,val){
+	console.log("writing");
+	fs.appendFile("config.json", "\""+attr+"\":\""+val+"\",\n" ,function(err) {
+		if(err) {
+			return console.log(err);
+		}
+	}); 
+}
+
+function closeConfig(){
+	console.log("close");
+	fs.appendFile("config.json", "\"val\":\"val\"\n}" ,function(err) {
+		if(err) {
+			return console.log(err);
+		}
+	}); 
+}
 
 io.on('connection', function (socket) {
+
+	socket.on('enableReports',function(data){
+		console.log("coming");
+		openConfig();
+		
+		setTimeout(function(){
+		writeConfig("Reports_Enabled","yes");
+		writeConfig("Relay_Service",data.relay);
+		writeConfig("Mail_Relay_User",data.relUser);
+		writeConfig("Mail_Relay_Password",data.relPass);
+		writeConfig("Mail_Sender_Email",data.fromUser);
+		writeConfig("Mail_Recipient_Email",data.toUser);
+		},300);
+		
+		setTimeout(function(){
+			closeConfig();
+		},600);
+		
+		socket.emit("redirectYes");
+	});
+
+	socket.on('disableReports',function(){
+		console.log("coming");
+		openConfig();
+		
+		setTimeout(function(){
+		writeConfig("Reports_Enabled","no");
+		writeConfig("Relay_Service","");
+		writeConfig("Mail_Relay_User","");
+		writeConfig("Mail_Relay_Password","");
+		writeConfig("Mail_Sender_Email","");
+		writeConfig("Mail_Recipient_Email","");
+		},300);
+		
+		setTimeout(function(){
+			closeConfig();
+		},600);
+		
+		socket.emit("redirectNo");
+	});
 
 	console.log("connection of new device");
 	//
@@ -131,9 +316,8 @@ io.on('connection', function (socket) {
 	var requirements = db.query(query,  function(err, rows, fields){
 			var string;
 			var req;
-			if (err) throw err;
+			if (err) {sendMail("doEditReq");throw err;}
 			req=rows[0];
-			
 			wann = req.requirement.split(" &req# ")[0];
 			muss =req.requirement.split(" &req# ")[1];
 			wer =req.requirement.split(" &req# ")[2];
@@ -247,7 +431,7 @@ io.on('connection', function (socket) {
 		query += ";";
 
 		var requirements = db.query(query,  function(err, rows, fields){
-			if (err) throw err;
+			if (err) {sendMail("editReq");throw err;}
 			for(var i=0;i<rows.length;i++){
 				requirementsArr.push(rows[i]);
 				console.log(rows[i]);
@@ -261,7 +445,7 @@ io.on('connection', function (socket) {
 		var query="DELETE FROM requirements WHERE id='"+data.id+"';";
 		
 		var requirements = db.query(query, function(err){
-			if (err) throw err;
+			if (err) {sendMail("deleteReq");throw err;}
 			socket.emit('delReq');
 		});
 		
@@ -307,7 +491,7 @@ io.on('connection', function (socket) {
 		var newData=data;
 			var query="select id from categories where name='"+data.category+"' AND team_id="+teamid+";";
 			var requirements = db.query(query, function(err,rows,fields){
-				if (err) {socket.emit('reqFail',1); return;}
+				if (err) {socket.emit('reqFail',1);sendMail("getCatID"); return;}
 				 if(typeof rows[0] !== "undefined"){
 					 newData.category=rows[0].id;
 					 console.log(newData);
@@ -337,7 +521,7 @@ io.on('connection', function (socket) {
 			if(data.category != null){
 			var query="insert into requirements (requirement, priority, project_id, status, relations ,owner_id, team_id, timestamp, category) values ('"+data.req+"', '"+data.prio+"','"+data.id+"','"+data.status+"','"+data.relations+"','"+userid+"','"+teamid+"','"+data.currentTime+"','"+data.category+"');";
 			var requirements = db.query(query, function(err){
-				if (err) {throw err;}
+				if (err) {sendMail("insertReq");throw err;}
 				console.log(userid+" "+teamid);
 			});
 		
@@ -376,7 +560,7 @@ io.on('connection', function (socket) {
 		var query = "Select name from team";
 		var code = 0;
 		var existsTeam = db.query(query, function(err,rows,fields){
-			if (err){ throw err; code=1;}
+			if (err){ sendMail("createTeam"); throw err; code=1;}
 			var alreadyExists = false;
 			for (var i = 0; i< rows.length; i++){
 				////console.log(rows[i]);
@@ -387,7 +571,7 @@ io.on('connection', function (socket) {
 			if (!alreadyExists){
 				var UserID="select id from users where username='"+data.user+"';";
 				var getUserID = db.query(UserID, function(err,rows,fields){
-					if (err) {throw err;  socket.emit('createTeam',code);}
+					if (err) {throw err;   sendMail("createTeam"); socket.emit('createTeam',code);}
 					var id;
 					id=rows[0];
 					////console.log(id.id);
@@ -395,7 +579,7 @@ io.on('connection', function (socket) {
 					var injection = "insert into team (name, creator_id) values('"+data.team+"','"+id.id+"');";
 					//console.log(injection);
 					var injectTeam = db.query(injection, function(err){
-						if (err) throw err;
+						if (err) {sendMail("createTeam");throw err;}
 						//console.log(code);
 						socket.emit('createTeam',code);
 					});
@@ -409,11 +593,11 @@ io.on('connection', function (socket) {
 	
 		var getTeamID = "select id from team where name='"+teamname+"';";
 		var do_getTeamID = db.query(getTeamID, function(err,rows,fields){
-			if (err){throw err;}
+			if (err){sendMail("createDefaultCategory");throw err;}
 			var teamid = rows[0].id;
 			var query = "insert into categories (name, team_id) values ('uncategorized',"+teamid+");";
 			var do_query = db.query(query, function(err,rows,fields){
-				if (err){throw err;}
+				if (err){sendMail("createDefaultCategory");throw err;}
 				socket.emit('createDefaultCategory');
 			});
 		});
@@ -427,8 +611,9 @@ io.on('connection', function (socket) {
 		var code;
 		var UserID="select team_id,id from users where username='"+data.user+"';";
 		var getUserID = db.query(UserID, function(err,rows,fields){
-					if (err) {throw err;  code=1; socket.emit('insertTeamOwner',code);}
+					if (err) {sendMail("insertTeamOwner");throw err;  code=1; socket.emit('insertTeamOwner',code);}
 					var userTeamid;
+					
 					userTeamid=rows[0].team_id;
 					var userid = rows[0].id;
 					if(userTeamid == null){
@@ -437,12 +622,12 @@ io.on('connection', function (socket) {
 							//console.log("Insert as Owner");
 							var teamid_query="select id from team where name='"+data.team+"';";
 							var getTeamID = db.query(teamid_query, function(err,rows,fields){
-								if (err) {throw err;  code=2; socket.emit('insertTeamOwner',code);}
+								if (err) {sendMail("insertTeamOwner");throw err;  code=2; socket.emit('insertTeamOwner',code);}
 								var teamid = rows[0].id;
 								//console.log(teamid);
 								var insert_query= "update users set team_id="+teamid+" where username='"+data.user+"';"
 								var insertUser = db.query(insert_query, function(err){
-									if (err) {throw err;  code=3; socket.emit('insertTeamOwner',code);}
+									if (err) {sendMail("insertTeamOwner");throw err;  code=3; socket.emit('insertTeamOwner',code);}
 								else {
 										for(var i=0;i<users.length;i++){
 											if (users[i].name==data.user){
@@ -459,7 +644,7 @@ io.on('connection', function (socket) {
 						if (data.action == 1){
 							var teamid_query="select id from team where name='"+data.team+"';";
 							var getTeamID = db.query(teamid_query, function(err,rows,fields){
-								if (err) {throw err;}
+								if (err) {sendMail("insertTeamOwner");throw err;}
 								var teamid = rows[0].id;
 								//console.log(teamid);
 								var insert_query= "update team set creator_id="+userid+" where id='"+teamid+"';"
@@ -467,7 +652,7 @@ io.on('connection', function (socket) {
 									var query_del_reqs = "update requirements set owner_id ="+userid+" where owner_id = "+data.userArr[1]+";";
 									var insertUser = db.query(query_del_reqs, function(err){
 									console.log('overwritten!');
-									if (err) {throw err;}
+									if (err) {sendMail("insertTeamOwner");throw err;}
 									code=0; socket.emit('newOwner',{code: code, user: data.userArr});
 									});
 								});
@@ -503,28 +688,28 @@ io.on('connection', function (socket) {
 		
 		var checkUserExists_query="select count(username) as total from users where username='"+data.user+"';";
 		var checkUserExists = db.query(checkUserExists_query, function(err,rows,fields){
-					if (err) {throw err;}
+					if (err) {sendMail("addTeamMember");throw err;}
 					var userExists = (rows[0].total > 0) ? true : false;
 					//console.log("exists "+userExists);
 					
 					if(userExists){
 						checkUserIsNotInOtherTeam_query = "select team_id from users where username='"+data.user+"';";
 						var checkUserIsNotInOtherTeam = db.query(checkUserIsNotInOtherTeam_query, function(err,rows,fields){
-							if (err) {throw err;}
+							if (err) {sendMail("addTeamMember");throw err;}
 							var userIsInOtherTeam = (rows[0].team_id != null) ? true : false;
 							//console.log("is in other team "+userIsInOtherTeam);
 						
 							if(!userIsInOtherTeam){
 								var addUserToTeam_query = "update users, team set users.team_id=team.id where team.name='"+data.team+"' AND users.username='"+data.user+"';";
 								var checkUserIsNotInOtherTeam = db.query(addUserToTeam_query, function(err,rows,fields){
-									if (err) {throw err;  }
+									if (err) {sendMail("addTeamMember");throw err;  }
 									else {
 										code=0; 
 										socket.emit('addTeamMember',{user: data.user,code: code,  team: data.team});
 										notifyNewMember(data.user);
 										var query = "select id from team where name='"+data.team+"';";
 										var checkUserIsNotInOtherTeam = db.query(query, function(err,rows,fields){
-											if (err) {throw err;  }
+											if (err) {sendMail("addTeamMember");throw err;  }
 											var teamid = rows[0].id;		
 											for(var i=0;i<users.length;i++){
 												if(typeof users[i] !== "undefined"){
@@ -578,7 +763,7 @@ function checkPasswordsEqual(password,password2){
 function changeData(data){
 	var insert_query = "UPDATE users SET password='"+md5(data.pw)+"', email='"+data.mail+"' WHERE username='"+data.user+"';";
 	var insert = db.query(insert_query, function(err,rows,fields){
-		if (err) {throw err;}
+		if (err) {sendMail("changeData");throw err;}
 		socket.emit('changeData',0);
 	});	
 }
@@ -595,7 +780,7 @@ function registerUser(data){
 		} else {
 			var insert_query = "INSERT INTO users (username, password, email) VALUES ('"+data.user+"','"+md5(data.pw)+"','"+data.mail+"')";
 			var insert = db.query(insert_query, function(err,rows,fields){
-				if (err) {throw err;}
+				if (err) {sendMail("registerUser");throw err;}
 				//console.log("successful!!!!! :-)");
 				socket.emit('registerUser',0);
 			});	
@@ -662,7 +847,7 @@ socket.on('checkLogin',function(data){
 	//console.log("checking user...");
 	var query = "Select * from users";
 	var getAllUsers = db.query(query, function(err,rows,fields){
-		if (err) {throw err;}
+		if (err) {sendMail("checkLogin");throw err;}
 		for (var i= 0; i< rows.length;i++) {
 			//console.log(rows[i]);
 			if(username == rows[i].username && password == rows[i].password){userExists=true;}
@@ -711,7 +896,7 @@ socket.on('leaveTeam', function(user){
 	var code=0;
 	var query= "update users set team_id=NULL where username='"+user+"';";
 	var leave = db.query(query, function(err,rows,fields){
-		if (err) {code=1;socket.emit('leaveTeam',code);}
+		if (err) {sendMail("leaveTeam");code=1;socket.emit('leaveTeam',code);}
 		socket.emit('leaveTeam',code);
 	});
 
@@ -734,7 +919,7 @@ socket.on('getTeamDropdown',function(user){
 	//console.log(userID);
 	var query = "select team.name, team.creator_id ,team.id, users.team_id from team,users where (team.creator_id=users.id OR team.id=users.team_id) AND users.username='"+user+"';";
 	var getTeams = db.query(query, function(err,rows,fields){
-		if (err) {throw err;}
+		if (err) {sendMail("getTeamDropdown");throw err;}
 		for (var i= 0; i< rows.length;i++) {
 			console.log(rows[i]);
 			//teams the user is owning, or member of
@@ -750,7 +935,7 @@ var teamid = data.teamid;
 var code = 0;
 var query = "update users set team_id="+teamid+" where username='"+user+"';";
 	var goIntoTeam = db.query(query, function(err,rows,fields){
-		if (err) {code = 1;socket.emit('intoTeam',code);}
+		if (err) {sendMail("intoTeam");code = 1;socket.emit('intoTeam',code);}
 		for(var i=0;i<users.length;i++){
 		if(typeof users[i] != "undefined"){
 			console.log("intoTeam id "+teamid);
@@ -770,7 +955,7 @@ var info = {
 }
 	dataQuery = "select username, email from users where id="+userid+";";
 	var catchData =  db.query(dataQuery, function(err,rows,fields){
-		if (err) {throw err;}
+		if (err) {sendMail("getUserInfos");throw err;}
 		info.username=rows[0].username;
 		info.email=rows[0].email;
 		
@@ -807,7 +992,7 @@ socket.on('deleteUserFromTeam',function(data){
 		
 		var query = "update users set team_id=NULL where id='"+userid+"';";
 		var deleteFromTeam =  db.query(query, function(err,rows,fields){
-			if (err) {throw err;}
+			if (err) {sendMail("deleteUserFromTeam");throw err;}
 			var code = 0; //user erfolgreich gelöscht
 			socket.emit('deleteUserFromTeam',{code: code, teamid: teamid});
 			
@@ -843,7 +1028,7 @@ socket.on('deleteTeam',function(data){
 	//get user's team id
 	var query = "select team_id from users where username='"+username+"';";
 	var deleteFromTeam =  db.query(query, function(err,rows,fields){
-			if (err) {throw err;}
+			if (err) {sendMail("deleteTeam");throw err;}
 			usersTeamID=rows[0].team_id;
 			
 			//debug
@@ -853,7 +1038,7 @@ socket.on('deleteTeam',function(data){
 			//count users in team
 			var query2 = "select users.username from users, team where users.team_id=team.id AND team.id='"+teamIDtoDelete+"';"; 
 			var deleteFromTeam =  db.query(query2, function(err,rows,fields){
-				if (err) {throw err;}
+				if (err) {sendMail("deleteTeam");throw err;}
 				numerOfUsersInTeam = rows.length;
 				
 				//debug
@@ -862,7 +1047,7 @@ socket.on('deleteTeam',function(data){
 				// get id of team creator
 				var query3 = "select team.creator_id from team where team.id='"+teamIDtoDelete+"';";
 				var deleteFromTeam =  db.query(query3, function(err,rows,fields){
-					if (err) {throw err;}
+					if (err) {sendMail("deleteTeam");throw err;}
 					creatorID=rows[0].creator_id;
 					
 					//debug
@@ -892,25 +1077,25 @@ socket.on('deleteTeam',function(data){
 								//...set user's team id = null
 								var query4 = "update users set team_id=NULL where username='"+username+"';";
 								var deleteFromTeam =  db.query(query4, function(err,rows,fields){
-									if (err) {throw err;}
+									if (err) {sendMail("deleteTeam");throw err;}
 								});
 							}
 							//delete all team's requirements		
 							var query5 = "delete from requirements where team_id="+teamIDtoDelete+";";
 							var deleteFromTeam =  db.query(query5, function(err,rows,fields){
-								if (err) {throw err;}
+								if (err) {sendMail("deleteTeam");throw err;}
 								//delete team
 								
 								
 								var query_deleteCats = "delete from categories where team_id="+teamIDtoDelete+";";
 								var deleteCats = db.query(query_deleteCats, function(err,rows,fields){
-									if (err) { throw err;}
+									if (err) {sendMail("deleteTeam"); throw err;}
 									
 			
 								
 									var query6 = "delete from team where id="+teamIDtoDelete+";";
 									var deleteTeam =  db.query(query6, function(err,rows,fields){
-										if (err) { throw err;
+										if (err) {sendMail("deleteTeam"); throw err;
 												//console.log("error ,code=1");
 												code=1; //konnte nicht gelöscht werden
 											socket.emit('deleteTeam',code);
@@ -932,7 +1117,7 @@ socket.on('deleteTeam',function(data){
 										//now delete categories
 										var query7 = "delete from categories where team_id="+teamIDtoDelete+";";
 										var deleteTeam =  db.query(query7, function(err,rows,fields){
-										if (err) { throw err;}
+										if (err) {sendMail("deleteTeam"); throw err;}
 										console.log("deleted teams categories");
 										});
 									});
@@ -959,7 +1144,7 @@ socket.on('getMembers',function(teamid){
 	var members= [];
 	var query = "SELECT users.id, users.username  FROM users where team_id="+teamid+";";
 	var goIntoTeam = db.query(query, function(err,rows,fields){
-		if (err) {throw err;}
+		if (err) {sendMail("getMembers");throw err;}
 		for(var i = 0;i <rows.length; i++){
 			members.push({id: rows[i].id,username: rows[i].username, teamid: teamid})
 		}		
@@ -984,7 +1169,7 @@ socket.on('getAllUsers',function(query){
 		var getUsers = "SELECT username, id, team_id, email FROM users;";
 	}
 	var allUsers = db.query(getUsers, function(err,rows,fields){
-		if (err) {throw err;}
+		if (err) {sendMail("getAllUsers");throw err;}
 		for(var i = 0;i < rows.length;i++){
 			all.push({id: rows[i].id, username: rows[i].username, teamid: rows[i].team_id, email: rows[i].email});
 		}
@@ -1002,26 +1187,25 @@ socket.on('forceDeleteUser', function(id){
 	//check if user has a team
 	var checkTeam = "select team_id from users where id='"+id+"';";
 	var teamChecked = db.query(checkTeam, function(err,rows,fields){
-		if (err) {throw err;} //console.log("q1");}
+		if (err) {sendMail("forceDeleteUser");throw err;} //console.log("q1");}
 		//if user has a team...
 		if(rows != null){
 			//...delete him from the team
 			var leaveTeam = "update users set team_id=NULL where id='"+id+"';";
 			var teamChecked = db.query(leaveTeam, function(err,rows,fields){
-				if (err) {throw err;}//console.log("q1");}
+				if (err) {sendMail("forceDeleteUser");throw err;}//console.log("q1");}
 				//console.log("set teamid = null");
 			});
 			
 			var delReqs = "delete from requirements where owner_id="+id+";";
 			var teamChecked = db.query(delReqs, function(err,rows,fields){
-				if (err) {throw err;}//console.log("q1");}
+				if (err) {sendMail("forceDeleteUser");throw err;}//console.log("q1");}
 				//console.log("deleted all user's reqs");
 			});
 			
 			var delUser = "delete from users where id='"+id+"';";
 			var teamChecked = db.query(delUser, function(err,rows,fields){
-				if (err) {throw err;}//console.log("q1");}
-				//console.log("deleted user");
+				if (err) {sendMail("forceDeleteUser");throw err;}
 				socket.emit('forceDeleteUser');
 				
 			for(var i=0;i<users.length;i++){
@@ -1051,7 +1235,7 @@ socket.on('getMyGroups',function(user){
 		
 	var query = "select team.name, team.creator_id ,team.id, users.team_id from team,users where (team.creator_id=users.id OR team.id=users.team_id) AND users.username='"+user+"';";
 	var getAllTeams = db.query(query, function(err,rows,fields){
-		if (err) {throw err;}
+		if (err) {sendMail("getMyGroups");throw err;}
 		for (var i= 0; i< rows.length;i++) {
 			////console.log(rows[i]);
 			//teams the user is owning, or member of
@@ -1063,18 +1247,10 @@ socket.on('getMyGroups',function(user){
 			}
 		}
 		if (myTeams.length > 0){
-			for (var i= 0; i< myTeams.length;i++) {
-				//console.log("myTeams: "+myTeams[i].name);
-			}
-			//console.log("usersTeamID: "+usersTeamID);	
-			//console.log("userIsCreatorOf "+userIsCreatorOf);	
-	
-		
 			if(usersTeamID != null){
-			
 				var query2 = "select name from team where id="+usersTeamID+";";
 				var getTeamName= db.query(query2, function(err,rows,fields){
-					if (err) {throw err;}
+					if (err) {sendMail("getMyGroups");throw err;}
 					memberOf=rows[0].name;
 					//console.log("userIsCreatorOf: "+userIsCreatorOf);
 					var groups = [ myTeams,memberOf,userIsCreatorOf,user ];	
@@ -1087,11 +1263,8 @@ socket.on('getMyGroups',function(user){
 			} else {
 				var groups = [ "", "", "",user];	
 				socket.emit('getMyGroups',groups);
-		}
+			}
 	});	
-	
-	
-	
 });
 
 socket.on('getGroupsToDelete',function(user){
@@ -1103,41 +1276,28 @@ socket.on('getGroupsToDelete',function(user){
 	var userID = user[1];
 	var userTeamID;
 		
-	//console.log(userID);
 	var query = "select team.name, team.creator_id ,team.id, users.team_id from team,users where (team.creator_id=users.id OR team.id=users.team_id) AND users.username='"+user[0]+"';";
 	var getAllTeams = db.query(query, function(err,rows,fields){
-		if (err) {throw err;}
+		if (err) {sendMail("getGroupsToDelete");throw err;}
 		for (var i= 0; i< rows.length;i++) {
-			////console.log(rows[i]);
 			//teams the user is owning, or member of
 			myTeams.push({name: rows[i].name, id: rows[i].id});
 			usersTeamID=rows[i].team_id;
-			//console.log("userID "+userID+" row creator id "+rows[i].creator_id);
 			if(userID == rows[i].creator_id){
 				userIsCreatorOf.push({name: rows[i].name, id: rows[i].id});
 			}
 		}
 		if (myTeams.length > 0){
-			/*for (var i= 0; i< myTeams.length;i++) {
-				//console.log("myTeams: "+myTeams[i].name);
-			}
-			//console.log("usersTeamID: "+usersTeamID);	
-			//console.log("userIsCreatorOf "+userIsCreatorOf);	
-	
-			//console.log("user[1]: "+user[1]);*/
 			if(usersTeamID != null){
 			
 				var query2 = "select name from team where id="+usersTeamID+";";
 				var getTeamName= db.query(query2, function(err,rows,fields){
-					if (err) {throw err;}
+					if (err) {sendMail("getGroupsToDelete");throw err;}
 					memberOf=rows[0].name;
-					//console.log("memberOf: "+memberOf);
-					//console.log("userIsCreatorOf: "+userIsCreatorOf);
 					var groups = [ myTeams,memberOf,userIsCreatorOf,user[0],userID ];	
 					socket.emit('getMyGroups',groups);
 				});
 			} else {
-					//console.log(userID);
 					var groups = [ myTeams,memberOf,userIsCreatorOf,user[0],userID];					
 					socket.emit('getMyGroups',groups);
 				}
@@ -1152,7 +1312,7 @@ socket.on('getGroupsToDelete',function(user){
 socket.on('deleteAllUsersFromTeam',function(data){
 	var kickUser = "update users set team_id=NULL where team_id='"+data.teamid+"';";
 	var getTeamName= db.query(kickUser, function(err,rows,fields){
-					if (err) {throw err;}
+					if (err) {sendMail("deleteAllUsersFromTeam");throw err;}
 					socket.emit('deleteAllUsersFromTeam',{user: data.user, teamid: data.teamid, userid:data.userid});
 	});
 });
@@ -1175,7 +1335,7 @@ socket.on('submitCategory',function(data){
 	
 		var getCats = "select name from categories where team_id="+teamid+";";
 		var getTeamName= db.query(getCats, function(err,rows,fields){
-			if (err) {throw err;}
+			if (err) {sendMail("submitCategory");throw err;}
 			for(var i=0;i<rows.length;i++){
 				if(rows[i].name == data.category){
 					exists=true;
@@ -1184,7 +1344,7 @@ socket.on('submitCategory',function(data){
 			} 	if(!exists) {
 					var query = "insert into categories (name, team_id) values ('"+data.category+"',"+teamid+");";
 					var getTeamName= db.query(query, function(err,rows,fields){
-						if (err) {throw err; socket.emit('submitCategory',1);}
+						if (err) {sendMail("submitCategory");throw err; socket.emit('submitCategory',1);}
 						socket.emit('submitCategory',0);
 						
 						//get members
@@ -1223,7 +1383,7 @@ socket.on('getCategories',function(data){
 	
 	var getCats = "select * from categories where team_id="+teamid+";";
 	var exec= db.query(getCats, function(err,rows,fields){
-		if (err) {throw err;}
+		if (err) {sendMail("getCategories");throw err;}
 		for(var i=0;i<rows.length;i++){
 			cats.push(rows[i]);
 		}
@@ -1245,14 +1405,14 @@ socket.on('deleteCat',function(data){
 	
 	var query2 = "select name from categories where id="+id+";";
 	var exec2= db.query(query2, function(err,rows,fields){
-		if (err) {throw err; }
+		if (err) {sendMail("deleteCat");throw err; }
 		var cat_name=rows[0].name;
 		//console.log(cat_name);
 	
 	
 		var query = "delete from categories where id="+id+";";
 		var exec= db.query(query, function(err,rows,fields){
-			if (err) {socket.emit('deleteCat',{username:username, code: 1});return }
+			if (err) {sendMail("deleteCat");socket.emit('deleteCat',{username:username, code: 1});return }
 		
 			//get users team id
 			for(var i=0;i<users.length;i++){
@@ -1280,7 +1440,7 @@ socket.on('deleteCat',function(data){
 		
 			var query3 = "update requirements,categories set requirements.category = 'uncategorized' WHERE  requirements.category='"+cat_name+"';";
 			var exec3= db.query(query3, function(err,rows,fields){
-				if (err) {throw err; }
+				if (err) {sendMail("deleteCat");throw err; }
 				//console.log("updated");
 			});
 		});
@@ -1290,7 +1450,7 @@ socket.on('deleteCat',function(data){
 socket.on('getEditData',function(id){
 	var query = "select id, name, team_id from categories where id="+id+";";
 	var exec= db.query(query, function(err,rows,fields){
-		if (err) {throw err; }
+		if (err) {sendMail("getEditData");throw err; }
 		console.log(rows[0].name+" "+rows[0].id);
 		socket.emit('getEditData',{id: rows[0].id, name: rows[0].name, teamid: rows[0].team_id});
 	});
@@ -1302,7 +1462,7 @@ var id= data.id;
 
 var query = "update categories set name='"+name+" 'where id="+id+";";
 	var exec= db.query(query, function(err,rows,fields){
-		if (err) {throw err; }
+		if (err) {sendMail("submitEdit");throw err; }
 		socket.emit('submitEdit');
 	});
 });

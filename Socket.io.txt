@@ -6,8 +6,14 @@ Socket.io:
 npm install -g node-gyp
 npm install socket.io
 npm install mysql
+npm install js-md5
+npm install fs
+npm install nodemailer
+npm install nconf
 
 cmd
 navigiere in sockettest 
 npm install
 node app.js
+
+danach zuerst die installation.html aufrufen, um config.json zu generieren

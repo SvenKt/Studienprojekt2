@@ -1600,3 +1600,43 @@ function logOut(){
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////USER//////END///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//INSTALL STUFF
+
+function install() {
+	var relay = $('#relay').val();
+	var relUser = $('#relUser').val();
+	var relPass = $('#relPass').val();
+	var fromUser = $('#fromUser').val();
+	var toUser = $('#toUser').val();
+	
+	var arr = {
+		relay: relay,
+		relUser: relUser,
+		relPass: relPass,
+		fromUser: fromUser,
+		toUser : toUser,
+	}
+	
+socket.emit('enableReports',arr);
+console.log("yey :D");
+}
+
+function skipInstall(){
+	socket.emit('disableReports');
+}
+
+
+socket.on("redirectYes", function(){
+	$('#read').show();
+	$('#read').text("configuration successfull. Please restart the server now! You will be redirected to login page in 5 seconds\n");
+	window.setTimeout(function(){location.replace("index.html");},5000);
+});
+	
+socket.on("redirectNo", function(){
+	$('#read').show();
+	$('#read').text("configuration skipped. You will be redirected to login page in 5 seconds\n");
+	window.setTimeout(function(){location.replace("index.html");},5000);
+});
+
