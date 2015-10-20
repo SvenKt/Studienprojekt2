@@ -8,6 +8,6 @@ npm install socket.io
 npm install mysql
 
 cmd
-navigiere in sockettest 
+navigiere in ordner
 npm install
 node app.js
