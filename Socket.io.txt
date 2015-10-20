@@ -12,8 +12,10 @@ npm install nodemailer
 npm install nconf
 
 cmd
-navigiere in sockettest 
+navigiere in ordner
 npm install
 node app.js
 
+
 danach zuerst die installation.html aufrufen, um config.json zu generieren
+
