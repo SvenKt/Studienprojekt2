@@ -121,7 +121,7 @@ function traceLog(mess) {
 var db = mysql.createConnection({
     host: 'localhost',
     user: 'reqmanager',
-	password: 'Proskater594',
+	password: '',
     database: 'requirement'
 });
 
