@@ -1,0 +1,5 @@
+Logfile startet on 2015_12_7-18-51-55
+#connected to database at 2015_12_7-18-51-55
+#{name: sven, socket: mjFIYSYQJJn0wk4KAAAA} has been added to array at 2015_12_7-18-51-55
+#{name: sven, socket: nT2s9HkvxgVCj9YWAAAB} has been added to array at 2015_12_7-18-51-55
+#{name: sven, socket: rc66mhsr07OuWEUtAAAC} has been added to array at 2015_12_7-18-52-1

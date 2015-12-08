@@ -1,0 +1,3 @@
+Errorlog file startet on 2015_12_7-18-23-45
+#debug error at 2015_12_7-18-46-14
+#debug error at 2015_12_7-18-47-48

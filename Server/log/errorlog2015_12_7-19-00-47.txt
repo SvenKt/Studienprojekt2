@@ -1,0 +1,2 @@
+Errorlog file startet on 2015_12_7-19-00-47
+#this is a test at 2015_12_7-19-01-11
