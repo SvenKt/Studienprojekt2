@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<script src="http://code.jquery.com/jquery-latest.js"></script>
+		<script type="text/javascript" src="../js/translate.js"></script>
+		<script src="../bootstrap/js/bootstrap.min.js"></script>
+		<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+		<script type="text/javascript" src="../js/dashboardScript.js"></script>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="../css/login.css">
+		<title> Red:Wire e-mail configuration</title>
+	
+	</head>
+	<body>
+	
+		<div class="jumbotron">
+			<img id='logo' src='../img/logo.png' alt="logo">
+			<p  class="panel panel-warning" id="read"></p>
+			</br></br>
+			<fieldset>
+				<h2> Admin configuration</h2>
+				<h3> Note: administrator username is "admin" !</h3>
+				<label >Admin password:	</label><input type="password" class="form-control" id="adm_pw" autofocus></br>
+				<label >Admin password repeat:</label><input type="password" class="form-control" name="password" id="adm_pw2"></br>
+			</fieldset>		
+			<button class="btn btn-success login" onClick="checkAdminConfiguration();" id="skipper" >Proceed</button>	
+			</p>
+		</div>
+	</body>
+</html>

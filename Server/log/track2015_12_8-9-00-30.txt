@@ -1,0 +1,6 @@
+Logfile startet on 2015_12_8-9-00-30
+#connected to database at 2015_12_8-9-00-31
+#{name: sven, socket: QAJkXIsROuqCiJCKAAAB} has been added to array at 2015_12_8-9-00-47
+#{name: erik, socket: b0j3z4bgJDEyydi3AAAJ} has been added to array at 2015_12_8-9-07-40
+#{name: user1, socket: QWhehLp2Ez53115rAAAL} has been added to array at 2015_12_8-9-10-4
+#{name: sven, socket: kUCa3JC3qj6JvWjUAAAN} has been added to array at 2015_12_8-9-11-55

@@ -1,0 +1,33 @@
+ 1567  apt-get update
+1565  apt-get install build-essential checkinstall
+ 1566  apt-get install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
+ 1574  wget http://python.org/ftp/python/2.7.5/Python-2.7.5.tgz
+ 1575  tar -xvf Python-2.7.5.tgz
+ 1576  cd Python-2.7.5/
+ 1578  ./configure
+ 1579  make
+ 1580  checkinstall
+#curl -sL https://deb.nodesource.com/setup | sudo bash -
+#apt-get install nodejs
+
+mysql -u root -p
+> create database requirement;
+> create user 'reqmanager'@'localhost' identified by "12345678";
+> grant all privileges on requirement.* to 'reqmanager'@'localhost' identified by '12345678';
+> flush privileges;
+> exit
+
+mkdir /var/www/redwire
+cp -R /path/to/redwire/* /var/www/redwire
+
+mkdir /var/www/rwServer
+cp -R /home/sven/nodeServer/* /var/www/rwServer
+
+iptables -A OUTPUT -p tcp --dport 465 -j ACCEPT // <--- für die Mails
+iptables -A INPUT -p tcp --dport 3000 -j ACCEPT // <--- für allgemeine Erreichbarkeit des Socketservers
+
+
+in dashboard.js zu <ip>:3000 verbinden
+<ip> in allen html <head> anpassen 
+
+node app.js
