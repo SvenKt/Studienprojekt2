@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<script src="http://code.jquery.com/jquery-latest.js"></script>
+		<meta charset="UTF-8">
+		<meta http-equiv="Expires" CONTENT="0">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="Pragma" CONTENT="no-cache">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="js/socket.io.js"></script>
+		<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+		<script src="bootstrap/js/bootstrap.min.js"></script>
+		<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+		<script type="text/javascript" src="js/translate.js"></script>
+		<script type="text/javascript" src="js/dashboardScript.js"></script>
+		<script type="text/javascript" src="js/adminpageScript.js"></script>
+		<link rel="stylesheet" href="css/dashboard.css">
+		<title>Admin Page</title>
+	</head>
+	<body onload="if (document.referrer == '') self.location='index.php';">
+		<div id="head">
+		</div><!--head-->
+		<div id="leftSide" class="col-md-2" >
+			<div class="input-group">
+				<span class="input-group-btn" onClick="searchUsers()" id="search">
+					<button class="btn btn-default" type="button" id="goButton">Go!</button>
+				</span>
+				<input type="text" id="search_field" class="form-control">
+			</div><!--input-group-->
+			<ul id="main-nav" class="nav nav-pills nav-stacked">
+				<li  id="l1" role="presentation" class="active navlist"><a onClick="getUsers()"   id="home"></a></li>
+				<li id="l4" class="navlist" role="presentation"><a data-toggle="modal"  id="prof" data-target="#profil"></a></li>
+				<li id="l6" class="navlist" role="presentation"><a onClick="logOut()"  id="logt" ></a></li>
+			</ul>
+		</div><!--left_nav-->
+		<div id="admin_content-wrapper" class=" content-wrapper panel col-md-10">
+
+			<div class="clickable" id="languageSwitcher">
+				<img title="Switch to english language" onClick="switchToEN()" src="img/uk.png"></img>
+			</div>
+			<h2 id="headline_adminpage">Übersicht</h2>
+			<hr>
+				<p class="panel panel-warning"id="admin_error"></p>
+				<div class="panel panel-warning" id="admin_dialog"></div>
+
+				<div id="admin_content" class="panel panel-body">
+					
+				</div><!--content-->
+			<hr>
+		</div><!--content-wrapper-->
+		<div id="footer">
+		
+		</div><!--footer-->
+		
+		<!-- Modal Profil-->
+			<div class="modal fade" id="profil" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h3 class="modal-title" id="profile_tophead">Profil</h3>
+						</div>
+						<div class="modal-body">
+							<p ><h4 id="head_modal_dash" ></h4></p></br>
+							
+							<fieldset>
+								<label id="newPW" >Neues Passwort</label><input type="password" class="form-control" name="passwd" id="ch_pw" ></br>
+								<label id="newPW_repeat" >Neues Passwort wiederholen</label><input type="password" class="form-control" name="passwd_repeat" id="ch_pw2" ></br>
+								<label id="newEmail" >Neue E-Mail</label><input type="text" class="form-control" name="email" id="ch_email" ></br>
+							</fieldset>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							<button class="btn btn-success" id="reg_submit_p" onClick="changeData()">Bestätigen</button>
+						</div>
+					</div>
+				</div>
+			</div>	
+		
+	</body>
+</html>

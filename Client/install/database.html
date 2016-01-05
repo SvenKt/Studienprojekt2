@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<script src="http://code.jquery.com/jquery-latest.js"></script>
+		<script type="text/javascript" src="../js/translate.js"></script>
+		<script src="../bootstrap/js/bootstrap.min.js"></script>
+		<script src="../js/socket.io.js"></script>
+		<script type="text/javascript" src="../js/dashboardScript.js"></script>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="../css/login.css">
+		<title> Red:Wire e-mail configuration</title>
+	
+	</head>
+	<body>
+	
+		<div class="jumbotron">
+			<img id='logo' src='../img/logo.png' alt="logo">
+			<p  class="panel panel-warning" id="read"></p>
+			</br></br>
+			<fieldset>
+				<h2> Database configuration</h2>
+				<h3> Note: the specified database and user must already exist!</h3>
+				<label >Database host (e.g. localhost):	</label><input type="text" class="form-control" id="db_host" autofocus></br>
+				<label >Database user (e.g. manager):</label><input type="text" class="form-control" name="password" id="db_user"></br>
+				<label >Database user password (e.g. mysecret123):</label><input type="password" class="form-control" name="username" id="db_pass"></br>
+				<label >Database name (e.g. db_requirements):</label><input type="text" class="form-control" name="password" id="db_name"></br>
+			</fieldset>		
+			<button class="btn btn-success login" onClick="testDatabaseConnection(); " id="installer" >Test connection</button> 
+			<button class="btn btn-success login" onClick="writeDatabaseConfiguration();location.replace('admin.html');" id="skipper" >Proceed</button>	
+			</p>
+		</div>
+	</body>
+</html>
