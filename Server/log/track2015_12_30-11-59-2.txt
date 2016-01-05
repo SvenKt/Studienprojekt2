@@ -1,0 +1,2 @@
+Logfile startet on 2015_12_30-11-59-2
+#connected to database at 2015_12_30-11-59-2
