@@ -151,6 +151,7 @@ var reqForm = {
  mess3:"",
  optional:"",
  id:"",
+ tooLong:"",
 }
 
 var csvtxt = {
@@ -339,7 +340,7 @@ function defineTranslationVars(lang){
 		category.feed0="Kategorie wurde erstellt";
 		category.feed1="Kategorie wurde gelöscht";
 		category.feed2="Kategorie wurde editiert";
-		category.fill="Bitte einen Namen für die Kategorie eingeben";
+		category.fill="Bitte einen Namen für die Kategorie eingeben / Keine unerlaubten Zeichen nutzen {_}";
 		
 			
 		admin.headline="Übersicht";
@@ -432,6 +433,7 @@ function defineTranslationVars(lang){
 		reqForm.feed_create=" hat eine Anforderung erstellt";
 		reqForm.feed_del=" hat eine Anforderung gelöscht";
 		reqForm.feed_edit=" hat eine Anforderung bearbeitet";
+		reqForm.tooLong="Fehler: Anforderung ist zu lang!";
 
 		csvtxt.req="Anforderung";
 		csvtxt.prio="Priorität";
@@ -483,6 +485,7 @@ function defineTranslationVars(lang){
 		reqForm.optional="Fehler: Bitte alle nicht-optionalen Felder ausfüllen!";
 		reqForm.id="Fehler: Bitte einen ID Wert größer / gleich 0 angeben!";
 		
+		
 		deleteTeam.mess0="Sie haben das Team gelöscht";
 		deleteTeam.mess1="Fehler: Sie können das Team nicht löschen, da sich noch mindestens eine weitere Person im Team befindet";
 		deleteTeam.mess2="Fehler: Sie haben nicht die Berechtigung, das Team zu löschen!";
@@ -531,7 +534,7 @@ function defineTranslationVars(lang){
 		category.feed0="Category created";
 		category.feed1="Category deleted";
 		category.feed2="Category edited";
-		category.fill="Please insert a category name";
+		category.fill="Please insert a category name / Do not use invalid characters {_}";
 		
 		admin.headline="Dashboard";
 	
@@ -625,6 +628,7 @@ function defineTranslationVars(lang){
 		reqForm.feed_create=" created a new requirement";
 		reqForm.feed_del=" deleted a requirement";
 		reqForm.feed_edit=" edited a requirement";
+		reqForm.tooLong="Error: Requirement has to many characters!";
 		
 		csvtxt.req="Requirement";
 		csvtxt.prio="Priority";

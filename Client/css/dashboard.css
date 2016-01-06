@@ -303,3 +303,12 @@ body .modal-dialog {
   /* Opera */
   transform: scale(1.1);
 }
+
+.requirementField {
+	
+}
+
+table {
+	table-layout:fixed;
+	word-wrap: break-word;
+}

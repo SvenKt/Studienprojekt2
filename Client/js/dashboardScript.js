@@ -208,10 +208,7 @@ socket.on('connect',function() {
 	checkHelpEnabled();},3000);
 		
 	$(window).load(function() {
-		//getRequirements();
-		//$('#status').fadeOut(); // will first fade out the loading animation
 		$('#preloader').delay(0).fadeOut('slow'); // will fade out the white DIV that covers the website.
-		//$('body').delay(2000).css({'overflow':'visible'});
 	});
 	$('[data-toggle="popover"]').popover();
 }	
@@ -312,13 +309,14 @@ function changeData(){
 	
 	socket.emit('changeData',{user:username ,pw: password, pw2:password_repeat, mail:email});
 }
-
 //Eingaben der Anforderung kontrollieren
 function checkRequirement(){
 	if($('#wann').val() == ""){fieldError(); return false;}
 	if($('#system').val() == ""){fieldError(); return false;}
 	if($('#objekt').val() == ""){fieldError(); return false;}
 	if($('#verb').val() == ""){fieldError(); return false;}
+	if(($('#wann').val()+$('#system').val()+$('#objekt').val()+$('#verb').val()+$('#wem').val()+$('#relations').val()).length > 200){ $('#error').text(reqForm.tooLong).slideDown(500).delay(500).slideUp(500); return false;}
+	
 	var reqId=$('#identity').val();
 	if(isNaN(reqId) || reqId < 0 || reqId == ""){$('#error').text(reqForm.id).slideDown(500).delay(2000).slideUp(500); return false;}
 	return true;
@@ -351,21 +349,25 @@ function insertReq(origin){
 		}
 		var theRequirement = wann + " &req# " + muss + " &req# " + system + " &req# " + wem + " &req# " + bieten + " &req# " + objekt + " &req# " + verb + ".";
 		theRequirement=theRequirement.replace(/</g, "&lt;").replace(/</g, "&gt;");
-		var currentTime = Date.now();
-		var activity;
-		var category = $('#cats option:selected').text();
-		console.log(category);
-
-		switch (origin) {
-			case 0:	createReqForm(); activity = false;break;
-			case 1: getRequirements(); activity = false;break;
-			case 2: getRequirements(); activity = true; break;
-			default: getRequirements(); activity = false; break;
-		}
-						
-		var data = {activity: activity,user: getUserName(), "req": theRequirement, "prio": prio, "username": getUserName(), "id": reqId, "status": reqStatus, "relations": relations, "currentTime": currentTime, category: category}
-		socket.emit('getCatID',data);
 		
+		if(theRequirement.length < 220){
+			var currentTime = Date.now();
+			var activity;
+			var category = $('#cats option:selected').text();
+			console.log(category);
+
+			switch (origin) {
+				case 0:	createReqForm(); activity = false;break;
+				case 1: getRequirements(); activity = false;break;
+				case 2: getRequirements(); activity = true; break;
+				default: getRequirements(); activity = false; break;
+			}
+						
+			var data = {activity: activity,user: getUserName(), "req": theRequirement, "prio": prio, "username": getUserName(), "id": reqId, "status": reqStatus, "relations": relations, "currentTime": currentTime, category: category}
+			socket.emit('getCatID',data);
+		} else {
+			$('#error').text(reqForm.tooLong).slideDown(500).delay(2000).slideUp(500);
+		}
 		
 		
 	}//else alert("Anforderungsfehler");
@@ -580,7 +582,7 @@ function setTable(requirements){
 							
 							string+="<tr>\
 									<th>"+p_id+"</th>\
-									<th id='result"+req_id+"'>"+req+"</th>\
+									<th  id='result"+req_id+"'>"+req+"</th>\
 									<th scope='row'>"+priority+"</th>\
 									<th>"+p_status+"</th>\
 									<th>"+p_rel+"</th>\
@@ -1078,7 +1080,7 @@ function createCategory(){
 
 function submitCategory(){
 	var cat = $('#catField').val();
-	if(cat != ""){
+	if((cat != "") && (cat.indexOf("_")==-1)){
 		socket.emit('submitCategory',{category: cat, username: getUserName()});
 	} else {
 		$('#error').text(category.fill).slideDown(500).delay(1000).slideUp(500);
@@ -1156,7 +1158,8 @@ function editCat(id){
 }
 
 socket.on('getEditData',function(data){
-	$('#catField').attr("value",data.name);
+	console.log(data.name);
+	$('#catField').val(data.name);
 	$('#sm_cat').attr("onClick","submitEdit("+data.id+")");
 	$('#glyph').removeClass("glyphicon-plus");
 	$('#glyph').addClass("glyphicon-ok");
