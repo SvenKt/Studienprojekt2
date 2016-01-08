@@ -266,13 +266,29 @@ socket.on('configureRedWire',function(){
 	var data = configData;
 	console.log(data);
 	
+	//create temp connection to write admin password into database
 	var db_temp = mysql.createConnection({
 		host: data.db_host,
 		user: data.db_user,
 		password: data.db_pass,
 		database: data.db_name
 	});
-
+	
+	db_temp.connect(function(err){
+		if (err) {
+			logerr("couldn't connect to database, check credentials");
+			throw err;
+		}
+	});
+	
+	var query = "update users set password='"+md5(data.Admin_Password)+"' where username='admin';"; 
+	
+	db_temp.query(query,function(err){
+		if (err) logerr(err); return;
+	});
+	
+	//write all configurations to config file
+	//it is asynchronous, so i applied some time in between with setTimeout
 	openConfig();
 	
 	setTimeout(function(){
@@ -292,18 +308,6 @@ socket.on('configureRedWire',function(){
 		closeConfig();
 	},600);
 	
-	db_temp.connect(function(err){
-		if (err) {
-			logerr("couldn't connect to database, check credentials");
-			throw err;
-		}
-	});
-	
-	var query = "update users set password='"+md5(data.Admin_Password)+"' where username='admin';"; 
-	
-	db_temp.query(query,function(err){
-		if (err) logerr(err); return;
-	});
 	
 	socket.emit('returnToIndex');
 });
@@ -311,12 +315,14 @@ socket.on('configureRedWire',function(){
 //////////////////////////////////////
 // ADMIN CONFIGURATION LISTENERS
 //////////////////////////////////////
+
+//store admin pw in global array
 socket.on("writeAdminConfiguration", function(pw){
 	configData.Admin_Password=pw;
 	console.log(configData);
 });
 
-
+//prints config summary on screen
 socket.on('showSummary',function(){
 	console.log(configData);
 	socket.emit('showSummary',configData);
@@ -367,6 +373,7 @@ socket.on('writeDatabaseConfiguration',function(data){
 // MAIL CONFIGURATION LISTENERS 
 ////////////////////////////////////////////
 
+	//reload config file --> does not work!!!!
 	socket.on('reloadConf',function(){
 		console.log("config file successfully loaded");
 	});
