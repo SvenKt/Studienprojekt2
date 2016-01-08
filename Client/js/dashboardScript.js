@@ -356,10 +356,16 @@ function insertReq(origin){
 			var category = $('#cats option:selected').text();
 			console.log(category);
 
+			//je nachdem, wo funktion aufgerufen wird, wird ein parameter mitgegeben 
+			//hier wird der parameter aufgerufen, um folgenden funktionsverlauf zu unterscheiden
 			switch (origin) {
-				case 0:	createReqForm(); activity = false;break;
+				//0 --> requirement kommt aus createReqForm() Funktion --> wurde normal erstellt
+				//um schnell mehrere reqs hintereinander zu erstellen, rufe erneut createReqForm auf
+				case 0:	createReqForm(); activity = false;break; 
+				//1 --> gibt es nicht, ... somehow xD
 				case 1: getRequirements(); activity = false;break;
-				case 2: getRequirements(); activity = true; break;
+				//2 --> von edit() --> requirement wurde bearbeitet und jetzt neu eingefügt 
+				case 2: getRequirements(); activity = true;break;
 				default: getRequirements(); activity = false; break;
 			}
 						
@@ -368,9 +374,7 @@ function insertReq(origin){
 		} else {
 			$('#error').text(reqForm.tooLong).slideDown(500).delay(2000).slideUp(500);
 		}
-		
-		
-	}//else alert("Anforderungsfehler");
+	}
 } 
 
 socket.on('getCatID',function(data){
@@ -385,6 +389,7 @@ function deleteReq(id, doAfterThis, param){
 		} 
 		socket.emit('deleteReq',{socketid: socket.io.engine.id, user: getUserName(), id: id, activity: activity});
 		if(doAfterThis != placeholder){
+			//wenn req editiert wird, gibt es eine folgefunktion --> insertreq(2), da param in diesem fall 2 ist
 			doAfterThis(param);
 		}
 		getRequirements();
@@ -1195,18 +1200,22 @@ socket.on('teamChanged',function(data){
 });
 
 socket.on('createTeam',function(code){
-	//console.log(code);
 	var mess;
 	switch (code) {
 		case 0: mess = createTeam.mess0; socket.emit('submitCategory',{category: "uncategorized", username: getUserName()});break;
 		case 1: mess = createTeam.mess1; break;
 	}
-	//teams neu laden --> meine Teams
-	refreshTeamData(true);	
-	$("#team_name").val('');	
-	window.setTimeout(function(){$("#head_modal_dash_team").text(mess).slideDown(500).delay(1000).slideUp(500);},3000);
-	socket.emit('createDefaultCategory',teamname);
-	socket.emit('insertTeamOwner',{user:getUserName(), team: teamname});
+	//teams neu laden --> meine Teams / nur wenn create erfolgreich
+	if(code == 0){
+		refreshTeamData(true);	
+		$("#team_name").val('');	
+		window.setTimeout(function(){$("#head_modal_dash_team").text(mess).slideDown(500).delay(1000).slideUp(500);},3000);
+		socket.emit('createDefaultCategory',teamname);
+		socket.emit('insertTeamOwner',{user:getUserName(), team: teamname});
+	} else {
+		// sonst zeige nur Fehlermeldung
+		window.setTimeout(function(){$("#head_modal_dash_team").text(mess).slideDown(500).delay(1000).slideUp(500);},3000);
+	}
 });
 
 socket.on('createDefaultCategory',function(){
