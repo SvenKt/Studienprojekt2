@@ -1,3 +1,9 @@
+/*	Sven-Erik Kujat
+*	HWR Berlin 
+*	08.01.2016
+*/
+
+
 var express = require('express')
 ,   app = express()
 ,   server = require('http').createServer(app)
@@ -1317,16 +1323,18 @@ socket.on('forceDeleteUser', function(id){
 				if (err) {sendMail("forceDeleteUser"); return;}
 			});
 			
+			//then delete all requirements from this user
 			var delReqs = "delete from requirements where owner_id="+id+";";
 			var teamChecked = db.query(delReqs, function(err,rows,fields){
 				if (err) {sendMail("forceDeleteUser"); return;}
 			});
-			
+			 //at last delete the user from database
 			var delUser = "delete from users where id='"+id+"';";
 			var teamChecked = db.query(delUser, function(err,rows,fields){
 				if (err) {sendMail("forceDeleteUser"); logerr(err);return;}
 				socket.emit('forceDeleteUser');
-				
+
+			//if the user is online, disconnect him from the server --> logout
 			for(var i=0;i<users.length;i++){
 				if(typeof users[i] != "undefined"){
 					if (users[i].id==id){
@@ -1343,6 +1351,7 @@ socket.on('forceDeleteUser', function(id){
 
 });
 
+
 socket.on('getMyGroups',function(user){
 	var myTeams= [];
 	var teamsImAMember;
@@ -1356,30 +1365,32 @@ socket.on('getMyGroups',function(user){
 	var getAllTeams = db.query(query, function(err,rows,fields){
 		if (err) {sendMail("getMyGroups"); logerr(err);return;}
 		for (var i= 0; i< rows.length;i++) {
-			////console.log(rows[i]);
 			//teams the user is owning, or member of
 			myTeams.push({name: rows[i].name, id: rows[i].id});
 			usersTeamID=rows[i].team_id;
-			//console.log("userID "+userID+" row creator id "+rows[i].creator_id);
+			//then get the teams, he is owner/creator of and store them into an array
 			if(userID == rows[i].creator_id){
 				userIsCreatorOf.push({name: rows[i].name, id: rows[i].id});
 			}
-		}
+		} //check if user has teams at all
 		if (myTeams.length > 0){
+			//get the team that he is currently member of
 			if(usersTeamID != null){
 				var query2 = "select name from team where id="+usersTeamID+";";
 				var getTeamName= db.query(query2, function(err,rows,fields){
 					if (err) {sendMail("getMyGroups"); logerr(err);return;}
 					memberOf=rows[0].name;
-					//console.log("userIsCreatorOf: "+userIsCreatorOf);
+					//create an array and store all information about the user's teams in there
 					var groups = [ myTeams,memberOf,userIsCreatorOf,user ];	
 					socket.emit('getMyGroups',groups);
 				});
 			} else {
+				//if user is not member in a team, but still owns teams-->memberOF is just empty
 					var groups = [ myTeams,memberOf,userIsCreatorOf,user];	
 					socket.emit('getMyGroups',groups);
 				}
 			} else {
+				//if user has no teams at all --> just send empty array only with username
 				var groups = [ "", "", "",user];	
 				socket.emit('getMyGroups',groups);
 			}
@@ -1394,36 +1405,49 @@ socket.on('getGroupsToDelete',function(user){
 	var userIsCreatorOf = [];
 	var userID = user[1];
 	var userTeamID;
-		
+	var username=user[0];
+	//user[0]=username	
+	
+	//get the user's teams he is member of or creator of
 	var query = "select team.name, team.creator_id ,team.id, users.team_id from team,users where (team.creator_id=users.id OR team.id=users.team_id) AND users.username='"+user[0]+"';";
 	var getAllTeams = db.query(query, function(err,rows,fields){
 		if (err) {sendMail("getGroupsToDelete"); logerr(err);return;}
+		
 		for (var i= 0; i< rows.length;i++) {
-			//teams the user is owning, or member of
+			
+			//store all teams in relation to user into an array with name and id
 			myTeams.push({name: rows[i].name, id: rows[i].id});
 			usersTeamID=rows[i].team_id;
+
+			//if user is creator of teams, store them into another array 
 			if(userID == rows[i].creator_id){
 				userIsCreatorOf.push({name: rows[i].name, id: rows[i].id});
 			}
-		}
-		if (myTeams.length > 0){
-			if(usersTeamID != null){
 			
+		}//if user has at least one team
+		
+		if (myTeams.length > 0){
+			//if user is member of a team
+			if(usersTeamID != null){
+		
+				//get the name of the user's team he is currently member of
 				var query2 = "select name from team where id="+usersTeamID+";";
 				var getTeamName= db.query(query2, function(err,rows,fields){
 					if (err) {sendMail("getGroupsToDelete"); logerr(err);return;}
 					memberOf=rows[0].name;
-					var groups = [ myTeams,memberOf,userIsCreatorOf,user[0],userID ];	
+					
+					//store everything into an array and send it
+					var groups = [ myTeams,memberOf,userIsCreatorOf,username,userID ];	
 					socket.emit('getMyGroups',groups);
 				});
-			} else {
-					var groups = [ myTeams,memberOf,userIsCreatorOf,user[0],userID];					
+			} 	else { //if user has no team --> memberOf will be empty
+					var groups = [ myTeams,memberOf,userIsCreatorOf,username,userID];					
 					socket.emit('getMyGroups',groups);
-				}
-			} else {
-				var groups = [ "", "", "",user[0],userID ];	
+				}	
+		} 	else {//if user has no teams just send empty array with username and userID
+				var groups = [ "", "", "",username,userID ];	
 				socket.emit('getMyGroups',groups);
-		}
+			}
 	});	
 });
 
@@ -1446,6 +1470,7 @@ socket.on('submitCategory',function(data){
 	var exists=false;
 	var members = [];
 	
+	//get user's team id via username
 	for(var i=0;i<users.length;i++){
 		if(typeof users[i] != "undefined"){
 			if (users[i].name==data.username){
@@ -1454,38 +1479,39 @@ socket.on('submitCategory',function(data){
 		}
 	}
 	
+	//if user has a team
 	if (teamid != null){
 	
 		var getCats = "select name from categories where team_id="+teamid+";";
 		var getTeamName= db.query(getCats, function(err,rows,fields){
 			if (err) {sendMail("submitCategory");logerr(err); return; }
+			
 			for(var i=0;i<rows.length;i++){
 				if(rows[i].name == data.category){
 					exists=true;
 					socket.emit('submitCategory',3);
 				}
-			} 	if(!exists) {
-					var query = "insert into categories (name, team_id) values ('"+data.category+"',"+teamid+");";
-					var getTeamName= db.query(query, function(err,rows,fields){
-						if (err) {sendMail("submitCategory"); logerr(err); socket.emit('submitCategory',1); return;}
-						socket.emit('submitCategory',0);
+			} 	
+			//check if category exists
+			if(!exists) {
+				var query = "insert into categories (name, team_id) values ('"+data.category+"',"+teamid+");";
+				var getTeamName= db.query(query, function(err,rows,fields){
+					if (err) {sendMail("submitCategory"); logerr(err); socket.emit('submitCategory',1); return;}
+					socket.emit('submitCategory',0);
 						
-						//get members
-						for(var i=0;i<users.length;i++){
-							if (users[i].teamID==teamid){
-								members.push(users[i]);
-							}
+					//get members
+					for(var i=0;i<users.length;i++){
+						if (users[i].teamID==teamid){
+							members.push(users[i]);
 						}
-	
-						//console.log(members);
-	
-						//sendet an alle mitglieder des membersarray eine notification
-						for(var i=0; i< members.length;i++){
-							//console.log("sending to "+members[i].name+"...");
-							io.to(members[i].socket).emit("submitCategory", {username: data.username, code:0});	
-						}
-					});
-				}
+					}
+
+					//sendet an alle mitglieder des membersarray eine notification
+					for(var i=0; i< members.length;i++){
+						io.to(members[i].socket).emit("submitCategory", {username: data.username, code:0});	
+					}
+				});
+			}
 		});	
 	} else {
 		socket.emit('submitCategory',2);
