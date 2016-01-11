@@ -756,12 +756,10 @@ socket.on('writeDatabaseConfiguration',function(data){
 					if(userTeamid == null){
 						console.log(data.action);
 
-							//console.log("Insert as Owner");
 							var teamid_query="select id from team where name='"+data.team+"';";
 							var getTeamID = db.query(teamid_query, function(err,rows,fields){
 								if (err) {sendMail("insertTeamOwner"); logerr(err);  code=2; socket.emit('insertTeamOwner',code);return;}
 								var teamid = rows[0].id;
-								//console.log(teamid);
 								var insert_query= "update users set team_id="+teamid+" where username='"+data.user+"';"
 								var insertUser = db.query(insert_query, function(err){
 									if (err) {sendMail("insertTeamOwner");  logerr(err); code=3; socket.emit('insertTeamOwner',code);return;}
@@ -783,7 +781,6 @@ socket.on('writeDatabaseConfiguration',function(data){
 							var getTeamID = db.query(teamid_query, function(err,rows,fields){
 								if (err) {sendMail("insertTeamOwner"); logerr(err);return;}
 								var teamid = rows[0].id;
-								//console.log(teamid);
 								var insert_query= "update team set creator_id="+userid+" where id='"+teamid+"';"
 								var insertUser = db.query(insert_query, function(err){
 									var query_del_reqs = "update requirements set owner_id ="+userid+" where owner_id = "+data.userArr[1]+";";
@@ -805,7 +802,6 @@ socket.on('writeDatabaseConfiguration',function(data){
 	function notifyNewMember(member){
 		var socket; 
 		for(var i=0;i<users.length;i++){
-			//console.log(users[i]);
 			if(typeof users[i] !== "undefined"){
 				if (users[i].name==member){
 					socket=users[i].socket;
@@ -827,14 +823,12 @@ socket.on('writeDatabaseConfiguration',function(data){
 		var checkUserExists = db.query(checkUserExists_query, function(err,rows,fields){
 					if (err) {sendMail("addTeamMember");logerr(err); return; }
 					var userExists = (rows[0].total > 0) ? true : false;
-					//console.log("exists "+userExists);
 					
 					if(userExists){
 						checkUserIsNotInOtherTeam_query = "select team_id from users where username='"+data.user+"';";
 						var checkUserIsNotInOtherTeam = db.query(checkUserIsNotInOtherTeam_query, function(err,rows,fields){
 							if (err) {sendMail("addTeamMember"); logerr(err); return;}
 							var userIsInOtherTeam = (rows[0].team_id != null) ? true : false;
-							//console.log("is in other team "+userIsInOtherTeam);
 						
 							if(!userIsInOtherTeam){
 								var addUserToTeam_query = "update users, team set users.team_id=team.id where team.name='"+data.team+"' AND users.username='"+data.user+"';";
@@ -918,7 +912,6 @@ function registerUser(data){
 			var insert_query = "INSERT INTO users (username, password, email) VALUES ('"+data.user+"','"+md5(data.pw)+"','"+data.mail+"')";
 			var insert = db.query(insert_query, function(err,rows,fields){
 				if (err) {sendMail("registerUser"); logerr(err); return;}
-				//console.log("successful!!!!! :-)");
 				socket.emit('registerUser',0);
 			});	
 		}
@@ -951,7 +944,6 @@ socket.on('registerUser', function(data){
 });
 
 socket.on('changeData', function(data){
-//console.log(data);
 	if(initInput(data.user,data.pw,data.pw2,data.mail)){
 		var passLengthOK=checkPassLength(data.pw,data.pw2);
 		var passEqual=checkPasswordsEqual(data.pw,data.pw2);
@@ -981,15 +973,12 @@ socket.on('checkLogin',function(data){
 	var username=data.user;
 	var password=md5(data.pw);
 	var userExists=false;
-	//console.log("checking user...");
 	var query = "Select * from users";
 	var getAllUsers = db.query(query, function(err,rows,fields){
 		if (err) {sendMail("checkLogin"); logerr(err); return;}
 		for (var i= 0; i< rows.length;i++) {
-			//console.log(rows[i]);
 			if(username == rows[i].username && password == rows[i].password){userExists=true;}
 		}
-		//console.log(userExists);
 		socket.emit('checkLogin',{exists: userExists, name:data.user});
 	});	
 });
@@ -1044,7 +1033,6 @@ socket.on('getTeamDropdown',function(user){
 	var myTeams= [];
 	var userID;
 	
-	//console.log(users);
 	for(var i=0;i<users.length;i++){
 		if(typeof users[i] != "undefined"){
 			if (users[i].name==user){
@@ -1053,7 +1041,6 @@ socket.on('getTeamDropdown',function(user){
 		}
 	}
 	
-	//console.log(userID);
 	var query = "select team.name, team.creator_id ,team.id, users.team_id from team,users where (team.creator_id=users.id OR team.id=users.team_id) AND users.username='"+user+"';";
 	var getTeams = db.query(query, function(err,rows,fields){
 		if (err) {sendMail("getTeamDropdown"); logerr(err); return;}
@@ -1168,19 +1155,12 @@ socket.on('deleteTeam',function(data){
 			if (err) {sendMail("deleteTeam");logerr(err); return; }
 			usersTeamID=rows[0].team_id;
 			
-			//debug
-			//console.log("usersTeamID :"+usersTeamID); //ok
-			//console.log("teamIDtodelete :"+teamIDtoDelete);
-			
 			//count users in team
 			var query2 = "select users.username from users, team where users.team_id=team.id AND team.id='"+teamIDtoDelete+"';"; 
 			var deleteFromTeam =  db.query(query2, function(err,rows,fields){
 				if (err) {sendMail("deleteTeam"); logerr(err); return;}
 				numerOfUsersInTeam = rows.length;
-				
-				//debug
-				//console.log("numberOfUsers: "+numerOfUsersInTeam); //ok
-				
+
 				// get id of team creator
 				var query3 = "select team.creator_id from team where team.id='"+teamIDtoDelete+"';";
 				var deleteFromTeam =  db.query(query3, function(err,rows,fields){
@@ -1564,47 +1544,57 @@ socket.on('deleteCat',function(data){
 	 var teamid;
 	var members = [];
 	
-	var query2 = "select name from categories where id="+id+";";
+	var query2 = "select name,team_ID from categories where id="+id+";";
 	var exec2= db.query(query2, function(err,rows,fields){
 		if (err) {sendMail("deleteCat"); logerr(err); return; }
 		var cat_name=rows[0].name;	
-	
-		var query = "delete from categories where id="+id+";";
-		var exec= db.query(query, function(err,rows,fields){
+		var cat_teamID = rows[0].team_ID;
+		console.log(cat_teamID);
+		
+		//get id of team's uncategorized category
+		var query2 = "select id from categories where team_id="+cat_teamID+" AND name='uncategorized';";
+		var exec2= db.query(query2, function(err,rows,fields){
 			if (err) {sendMail("deleteCat");socket.emit('deleteCat',{username:username, code: 1});return; }
-		
-			//get users team id
-			for(var i=0;i<users.length;i++){
-				//console.log(users[i]);
-				if (users[i].name==username){
-					teamid = users[i].teamID;
-				}
-			}
-				//console.log(teamid);
+			var uncategorizedID=rows[0].id;	
+			console.log("uncategorized: "+uncategorizedID+" , id: "+id);
+	
+			//set all categories requirements = uncategorized
+			var query3 = "update requirements as r, categories as c set r.category="+uncategorizedID+" WHERE r.category="+id+";";
+			var exec2= db.query(query3, function(err,rows,fields){
+				if (err) {sendMail("deleteCat"); logerr(err); return; }
+	
+				var query = "delete from categories where id="+id+";";
+				var exec= db.query(query, function(err,rows,fields){
+					if (err) {sendMail("deleteCat");socket.emit('deleteCat',{username:username, code: 1});return; }
+					//get users team id
+					for(var i=0;i<users.length;i++){
+						//console.log(users[i]);
+						if (users[i].name==username){
+							teamid = users[i].teamID;
+						}
+					}
+					//console.log(teamid);
 
-			//get members
-			for(var i=0;i<users.length;i++){
-				if (users[i].teamID==teamid){
-					members.push(users[i]);
-				}
-			}
+					//get members
+					for(var i=0;i<users.length;i++){
+						if (users[i].teamID==teamid){
+							members.push(users[i]);
+						}
+					}
 	
-			//console.log(members);
-	
-			//sendet an alle mitglieder des membersarray eine notification
-			for(var i=0; i< members.length;i++){
-				//console.log("sending to "+members[i].name+"...");
-				io.to(members[i].socket).emit("deleteCat", {username: username, code:0});	
-			}
+			
+					//sendet an alle mitglieder des membersarray eine notification
+					for(var i=0; i< members.length;i++){
+						//console.log("sending to "+members[i].name+"...");
+						io.to(members[i].socket).emit("deleteCat", {username: username, code:0});	
+					}
 		
-			var query3 = "update requirements,categories set requirements.category = 'uncategorized' WHERE  requirements.category='"+cat_name+"';";
-			var exec3= db.query(query3, function(err,rows,fields){
-				if (err) {sendMail("deleteCat");logerr(err); return; }
-				//console.log("updated");
+				});
 			});
 		});
 	});
 });
+
 
 socket.on('getEditData',function(id){
 	var query = "select id, name, team_id from categories where id="+id+";";
