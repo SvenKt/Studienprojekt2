@@ -1,5 +1,5 @@
 // Add a connect listener
-var socket = io.connect('http://localhost:3000');
+var socket = io.connect('ws://192.168.1.164:3000');
 
 // VARS
 var feedEmpty=true;
@@ -7,6 +7,15 @@ var oldActive;
 var toggle=false;
 switchToDE();
 var sessionID;
+
+//constructor for team 
+function Team(){
+	this.name = null;
+}
+
+var teamObject = new Team();
+
+
 
 $(document).ready(function(){
 
@@ -180,7 +189,7 @@ socket.on('connect',function() {
 		for(var i = 0;i < categories.length; i++){
 			items+="<li><a onClick=\"getRequirements(\'cat_"+categories[i].name+"\')\">"+categories[i].name+"</a></li>";
 		}
-		console.log(items);
+		//console.log(items);
 		body.html(items);
 		//body.show();
 	});
@@ -354,7 +363,7 @@ function insertReq(origin){
 			var currentTime = Date.now();
 			var activity;
 			var category = $('#cats option:selected').text();
-			console.log(category);
+			//console.log(category);
 
 			//je nachdem, wo funktion aufgerufen wird, wird ein parameter mitgegeben 
 			//hier wird der parameter aufgerufen, um folgenden funktionsverlauf zu unterscheiden
@@ -1192,11 +1201,10 @@ function loadTeamOptions(){
 	getMyGroups();
 }
 
-var teamname;
-var justEnteredTeam = false;
+//var teamname;
 
 socket.on('teamChanged',function(data){
-	 insertIntoFeed("Team wurde ge√§ndert");
+	 insertIntoFeed("Team wurde ge‰ndert");
 });
 
 socket.on('createTeam',function(code){
@@ -1209,9 +1217,10 @@ socket.on('createTeam',function(code){
 	if(code == 0){
 		refreshTeamData(true);	
 		$("#team_name").val('');	
+		console.log("teamObject:" +teamObject.name);
 		window.setTimeout(function(){$("#head_modal_dash_team").text(mess).slideDown(500).delay(1000).slideUp(500);},3000);
-		socket.emit('createDefaultCategory',teamname);
-		socket.emit('insertTeamOwner',{user:getUserName(), team: teamname});
+		socket.emit('createDefaultCategory',teamObject.name);
+		socket.emit('insertTeamOwner',{user:getUserName(), team: teamObject.name});
 	} else {
 		// sonst zeige nur Fehlermeldung
 		window.setTimeout(function(){$("#head_modal_dash_team").text(mess).slideDown(500).delay(1000).slideUp(500);},3000);
@@ -1250,10 +1259,15 @@ console.log(data);
 });
 
 //Neues Team erstellen
-function createTeam(){
-	teamname = $("#team_name").val();	
-	if (teamname != ""){
-		socket.emit('createTeam',{user: getUserName(), team: teamname});
+function createTeam(team){
+	if(team != undefined){
+		teamObject.name = team;
+	} else {
+		teamObject.name = $("#team_name").val();
+	}
+	
+	if (teamObject.name != ""){
+		socket.emit('createTeam',{user: getUserName(), team: teamObject.name});
 	} else {
 		$("#head_modal_dash_team").text(createTeam.empty).slideDown(500).delay(2000).slideUp(500);	
 	}
@@ -1757,3 +1771,50 @@ function configureRedWire(){
 socket.on('returnToIndex',function(){
 	location.replace('../index.html');
 });
+////////////////////////////////////////////////////////////////////////////////////////////
+//DEBUG
+////////////////////////
+var testing = {
+		interval:""
+}
+function makeName()
+{
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    for( var i=0; i < 5; i++ ){
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+    return text;
+}
+
+function stressTest(){
+	
+	var toggle = true;
+	var team;
+	
+	var requirement = {
+			user: "sven",
+			req : "11 &req# muss &req# 1 &req#  &req# f‰hig sein, &req# 11 &req# 11.",
+			prio: "2",
+			id: 99,
+			status: "im Backlog",
+			relations: "keine",
+			currentTime: "1452610309019",
+			category: "256"		
+	}
+	
+	
+		testing.interval = setInterval(
+			function(){
+				team = makeName();
+				createTeam(team);
+				//socket.emit('insertReq', requirement);
+			}
+		,1);
+}
+
+function stopTest(){
+	clearInterval(testing.interval);
+}
+
