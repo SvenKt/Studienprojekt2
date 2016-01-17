@@ -1,6 +1,6 @@
 /*	Sven-Erik Kujat
 *	HWR Berlin 
-*	08.01.2016
+*	14.01.2016
 */
 
 
@@ -17,6 +17,11 @@ var express = require('express')
 , 	error = logger.error
 ,	trace = logger.trace;
 
+
+
+//////////////////
+//F‹R CORS
+//AUﬂERDEM M‹SSEN PORTS FREIGEGEBEN WERDEN, DAMIT KEINE FEHLERMELDUNG WEGEN CORS KOMMT
 app.use('/',function(req,res,next){
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -28,7 +33,7 @@ app.get('/', function(req,res,next){
 	res.send('Hello You');
 	next();
 });
-
+/////////////////
 var users = [];	
 var reqToEdit;
 var date = new Date();
@@ -50,7 +55,7 @@ var configData = {
 	Admin_Password:""
 }
 
-// GET FORMATTED DATE FOR DEFINING LOG NAMES
+// GET FORMATTED DATE FOR DEFINING LOG FILE NAMES
 
 function getCurTime(){
 	var d = new Date();
@@ -195,7 +200,7 @@ db.connect(function(err){
 	
 });
 
-//server h√∂rt auf port 3000 --> verbindung mittels "localhost:3000"
+//server hˆrt auf port 3000 --> verbindung mittels "localhost:3000"
 server.listen(3000);
 
 
@@ -248,6 +253,7 @@ console.log("open");
 	}); 
 }
 
+// the config files are written in json format
 function writeConfig(attr,val){
 	console.log("writing");
 	fs.appendFile(confFile, "\""+attr+"\":\""+val+"\",\n" ,function(err) {
@@ -282,7 +288,7 @@ socket.on('sendEmail', function(){
 
 socket.on('configureRedWire',function(){
 	var data = configData;
-	console.log(data);
+	//console.log(data);
 	
 	//create temp connection to write admin password into database
 	var db_temp = mysql.createConnection({
@@ -337,12 +343,12 @@ socket.on('configureRedWire',function(){
 //store admin pw in global array
 socket.on("writeAdminConfiguration", function(pw){
 	configData.Admin_Password=pw;
-	console.log(configData);
+	//console.log(configData);
 });
 
 //prints config summary on screen
 socket.on('showSummary',function(){
-	console.log(configData);
+	//console.log(configData);
 	socket.emit('showSummary',configData);
 });
 
@@ -352,7 +358,7 @@ socket.on('showSummary',function(){
 	
 socket.on('testDatabaseConnection',function(data){
 
-console.log(data);
+//console.log(data);
 	
 	//instanciates temporary database connection with input data from installation form
 	//and tries to connect to database
@@ -460,7 +466,7 @@ socket.on('writeDatabaseConfiguration',function(data){
 	
 	// f√ºr debug, gibt auf anfrage des clients userarray aus
 	socket.on('showUsers',function(){
-		console.log(users);
+		//console.log(users);
 		sendMail("debug error");
 		//console.log("ahuuuu");
 	});
@@ -582,7 +588,7 @@ socket.on('writeDatabaseConfiguration',function(data){
 			if (err) {sendMail(error.getRequirements); logerr(err); return;}
 			for(var i=0;i<rows.length;i++){
 				requirementsArr.push(rows[i]);
-				console.log(rows[i]);
+				//console.log(rows[i]);
 			}
 			socket.emit('getRequirements',requirementsArr);
 		});
@@ -639,7 +645,7 @@ socket.on('writeDatabaseConfiguration',function(data){
 				if (err) {socket.emit('reqFail',1);sendMail("getCatID"); logerr(err); return;}
 				 if(typeof rows[0] !== "undefined"){
 					 newData.category=rows[0].id;
-					 console.log(newData);
+					// console.log(newData);
 					 socket.emit('getCatID',newData);
 				 } else {
 					 socket.emit('reqFail',1);
@@ -667,7 +673,7 @@ socket.on('writeDatabaseConfiguration',function(data){
 			var query="insert into requirements (requirement, priority, project_id, status, relations ,owner_id, team_id, timestamp, category) values ('"+data.req+"', '"+data.prio+"','"+data.id+"','"+data.status+"','"+data.relations+"','"+userid+"','"+teamid+"','"+data.currentTime+"','"+data.category+"');";
 			var requirements = db.query(query, function(err){
 				if (err) {sendMail(error.insertRequirement);logerr(err); return; }
-				console.log(userid+" "+teamid);
+				//console.log(userid+" "+teamid);
 			});
 			var members = [];
 		
@@ -692,7 +698,7 @@ socket.on('writeDatabaseConfiguration',function(data){
 			}
 			}
 		} else {	
-			console.log(teamid);
+			//console.log(teamid);
 			code=1;
 			socket.emit('reqFail',{code: code});
 		}
@@ -712,37 +718,34 @@ socket.on('writeDatabaseConfiguration',function(data){
 			if (!alreadyExists){
 				var UserID="select id from users where username='"+data.user+"';";
 				var getUserID = db.query(UserID, function(err,rows,fields){
-					if (err) {  logerr(err);  sendMail(error.getUser); socket.emit('createTeam',code);return;}
+					if (err) {  logerr(err);  sendMail(error.getUser); socket.emit('createDefaultCategory',code);return;}
 					var id = rows[0].id;
+					console.log("teamname creation:"+data.team);
 					var injection = "insert into team (name, creator_id) values('"+data.team+"','"+id+"');";
 					var injectTeam = db.query(injection, function(err){
 						if (err) {sendMail(error.createTeam); logerr(err); return; }
+						var getTeamID = "select id from team where name='"+data.team+"';";
+						var do_getTeamID = db.query(getTeamID, function(err,rows,fields){
+							if (err){sendMail(error.getTeamID_defCat); logerr(err); return;}
+								var teamid = rows[0].id;
+								var query = "insert into categories (name, team_id) values ('uncategorized',"+teamid+");";
+								var do_query = db.query(query, function(err,rows,fields){
+									if (err){sendMail(error.defaultCategory); logerr(err); return;}
+									socket.emit('createDefaultCategory',code);
+								});
+						});
 					});
 				});
 			} else {
 				code = 1;
+				socket.emit('createDefaultCategory',code);
 			}
-			socket.emit('createTeam',code);
+			
 		});
-	});
-	
-	socket.on('createDefaultCategory',function(teamname){
-		console.log("teamname:" +teamname);
-		var getTeamID = "select id from team where name='"+teamname+"';";
-		var do_getTeamID = db.query(getTeamID, function(err,rows,fields){
-			if (err){sendMail(error.getTeamID_defCat); logerr(err); return;}
-			var teamid = rows[0].id;
-			var query = "insert into categories (name, team_id) values ('uncategorized',"+teamid+");";
-			var do_query = db.query(query, function(err,rows,fields){
-				if (err){sendMail(error.defaultCategory); logerr(err); return;}
-				socket.emit('createDefaultCategory');
-			});
-		});
-	
 	});
 	
 	socket.on('insertTeamOwner', function(data){
-		console.log(data);
+		//console.log(data);
 		
 		
 		var code;
@@ -754,7 +757,7 @@ socket.on('writeDatabaseConfiguration',function(data){
 					userTeamid=rows[0].team_id;
 					var userid = rows[0].id;
 					if(userTeamid == null){
-						console.log(data.action);
+						//console.log(data.action);
 
 							var teamid_query="select id from team where name='"+data.team+"';";
 							var getTeamID = db.query(teamid_query, function(err,rows,fields){
@@ -1003,7 +1006,7 @@ socket.on('teamChanged', function(data){
 		}
 	}
 	
-	console.log(users);
+	//console.log(users);
 	
 	socket.emit('teamChanged',{newID: teamID, user: user});
 });
@@ -1020,7 +1023,7 @@ socket.on('leaveTeam', function(user){
 			}
 		}
 		
-		console.log(users);
+		//console.log(users);
 	}
 	
 	var code=0;
@@ -1049,7 +1052,7 @@ socket.on('getTeamDropdown',function(user){
 	var getTeams = db.query(query, function(err,rows,fields){
 		if (err) {sendMail(error.getTeam); logerr(err); return;}
 		for (var i= 0; i< rows.length;i++) {
-			console.log(rows[i]);
+			//console.log(rows[i]);
 			//teams the user is owning, or member of
 			myTeams.push({name: rows[i].name, id: rows[i].id});
 		}
@@ -1066,7 +1069,7 @@ var query = "update users set team_id="+teamid+" where username='"+user+"';";
 		if (err) {sendMail(error.addMember);code = 1;socket.emit('intoTeam',code);}
 		for(var i=0;i<users.length;i++){
 		if(typeof users[i] != "undefined"){
-			console.log("intoTeam id "+teamid);
+			//console.log("intoTeam id "+teamid);
 			if (users[i].name==user){
 				users[i].teamID=teamid;
 			}
@@ -1591,7 +1594,7 @@ socket.on('getEditData',function(id){
 	var query = "select id, name, team_id from categories where id="+id+";";
 	var exec= db.query(query, function(err,rows,fields){
 		if (err) {sendMail(error.getCategory);logerr(err);  return;}
-		console.log(rows[0].name+" "+rows[0].id);
+		//console.log(rows[0].name+" "+rows[0].id);
 		socket.emit('getEditData',{id: rows[0].id, name: rows[0].name, teamid: rows[0].team_id});
 	});
 });
