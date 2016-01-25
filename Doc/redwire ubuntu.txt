@@ -27,7 +27,7 @@ iptables -A OUTPUT -p tcp --dport 465 -j ACCEPT // <--- für die Mails
 iptables -A INPUT -p tcp --dport 3000 -j ACCEPT // <--- für allgemeine Erreichbarkeit des Socketservers
 
 
-in dashboard.js zu <ip>:3000 verbinden
-<ip> in allen html <head> anpassen 
+in dashboard.js zu http://<ip>:3000 verbinden
+
 
 node app.js
