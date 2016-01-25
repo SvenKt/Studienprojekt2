@@ -1,2 +1,0 @@
-Errorlog file startet on 2015_12_8-9-56-38
-#couldn't connect to database, check credentials at 2015_12_8-9-56-39

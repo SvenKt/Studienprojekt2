@@ -1,3 +1,0 @@
-Errorlog file startet on 2016_1_4-10-27-51
-#deleteReq at 2016_1_4-10-28-4
-#null at 2016_1_4-10-28-4

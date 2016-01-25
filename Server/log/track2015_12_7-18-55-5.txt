@@ -1,4 +1,0 @@
-Logfile startet on 2015_12_7-18-55-5
-#connected to database at 2015_12_7-18-55-5
-#{name: sven, socket: FX0s1n_jYT5sIUWLAAAB} has been added to array at 2015_12_7-18-55-5
-#{name: sven, socket: UdaDpu3t_DMO2hDHAAAE} has been added to array at 2015_12_7-18-55-16

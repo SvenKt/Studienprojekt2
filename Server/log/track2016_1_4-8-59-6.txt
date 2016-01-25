@@ -1,2 +1,0 @@
-Logfile startet on 2016_1_4-8-59-6
-#connected to database at 2016_1_4-8-59-6

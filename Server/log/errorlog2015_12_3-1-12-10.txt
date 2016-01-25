@@ -1,2 +1,0 @@
-Errorlog file startet on 2015_12_3-1-12-10
-#debug error at 2015_12_3-1-13-12
