@@ -1,0 +1,14 @@
+Logfile startet on 2016_1_14-13-01-10
+#connected to database at 2016_1_14-13-01-11
+#{name: sven, socket: TpasXVEksdvLeeQIAAAA} has been added to array at 2016_1_14-13-01-11
+#User has been disconnected at 2016_1_14-13-04-17
+#{name: sven, socket: Ip6-rsEZRzDwd7sxAAAC} has been added to array at 2016_1_14-13-04-19
+#User has been disconnected at 2016_1_14-13-05-8
+#{name: sven, socket: 3kXtTuUb6IZNgEJWAAAD} has been added to array at 2016_1_14-13-05-10
+#User has been disconnected at 2016_1_14-13-07-31
+#{name: sven, socket: KBh32rU2nt2mizsyAAAE} has been added to array at 2016_1_14-13-07-33
+#User has been disconnected at 2016_1_14-13-07-49
+#new user has logged in at 2016_1_14-13-07-59
+#User has been disconnected at 2016_1_14-13-07-59
+#{name: sven, socket: JmCR_dlOTTHaE0juAAAH} has been added to array at 2016_1_14-13-08-1
+#User has been disconnected at 2016_1_14-13-08-7

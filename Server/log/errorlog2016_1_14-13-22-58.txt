@@ -1,0 +1,5 @@
+Errorlog file startet on 2016_1_14-13-22-58
+#24 could not get Category name from database. database error at 2016_1_14-13-23-0
+#Error: ER_BAD_FIELD_ERROR: Unknown column 'undefined' in 'where clause' at 2016_1_14-13-23-0
+#24 could not get Category name from database. database error at 2016_1_14-13-23-0
+#Error: ER_BAD_FIELD_ERROR: Unknown column 'undefined' in 'where clause' at 2016_1_14-13-23-0

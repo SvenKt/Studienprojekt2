@@ -312,3 +312,24 @@ table {
 	table-layout:fixed;
 	word-wrap: break-word;
 }
+
+.headline {
+	background-color: white;
+	border-radius:4px;
+	padding:0.3%;
+	color: black;
+	border: 1px solid black;
+	font-size: 75%;
+}
+
+#headline_dashboard {
+	
+}
+
+#head_row_dropdown {
+	text-align:right;
+}
+
+option {
+	max-width: 10vw;
+}

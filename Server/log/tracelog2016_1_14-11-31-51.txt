@@ -1,0 +1,5 @@
+Logfile startet on 2016_1_14-11-31-51
+#connected to database at 2016_1_14-11-31-51
+#{name: sven, socket: 5iFGfhY08XIYOT2BAAAA} has been added to array at 2016_1_14-11-31-55
+#User has been disconnected at 2016_1_14-11-31-55
+#{name: sven, socket: CCVWLVxNuaOLFdp3AAAC} has been added to array at 2016_1_14-11-31-57

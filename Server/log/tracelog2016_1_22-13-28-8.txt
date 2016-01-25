@@ -1,0 +1,136 @@
+Logfile startet on 2016_1_22-13-28-8
+#connected to database at 2016_1_22-13-28-8
+#{name: sven, socket: 0K-fYykrL3Hr1vsGAAAA} has been added to array at 2016_1_22-13-28-13
+#User has been disconnected at 2016_1_22-13-31-34
+#{name: sven, socket: rWXcCGy7xz40pZHEAAAB} has been added to array at 2016_1_22-13-31-36
+#User has been disconnected at 2016_1_22-13-32-5
+#{name: sven, socket: o7mN2SuXpCUaXId8AAAC} has been added to array at 2016_1_22-13-32-8
+#User has been disconnected at 2016_1_22-13-35-26
+#{name: sven, socket: L8A1mbK46PT1eoQbAAAD} has been added to array at 2016_1_22-13-35-28
+#User has been disconnected at 2016_1_22-13-36-14
+#{name: sven, socket: 49-SGiSUUZnIbpESAAAE} has been added to array at 2016_1_22-13-36-16
+#User has been disconnected at 2016_1_22-13-43-10
+#{name: sven, socket: u-PvEqpfsmIrg8MDAAAF} has been added to array at 2016_1_22-13-43-12
+#User has been disconnected at 2016_1_22-13-44-10
+#{name: sven, socket: sRZfJdSArvBW0YvaAAAG} has been added to array at 2016_1_22-13-44-12
+#User has been disconnected at 2016_1_22-13-44-35
+#{name: sven, socket: RVcO31PswHYjXgYUAAAH} has been added to array at 2016_1_22-13-44-37
+#User has been disconnected at 2016_1_22-13-45-49
+#{name: sven, socket: YqBNijkHZw9ZtoEHAAAI} has been added to array at 2016_1_22-13-45-53
+#User has been disconnected at 2016_1_22-13-46-4
+#{name: sven, socket: h2sALbLNEy9f05dPAAAJ} has been added to array at 2016_1_22-13-46-6
+#User has been disconnected at 2016_1_22-13-46-33
+#{name: sven, socket: yxz5foopzGofcibbAAAK} has been added to array at 2016_1_22-13-46-36
+#User has been disconnected at 2016_1_22-13-46-50
+#{name: sven, socket: E4W0kopjVT8ABxXrAAAL} has been added to array at 2016_1_22-13-46-52
+#User has been disconnected at 2016_1_22-13-47-33
+#{name: sven, socket: l_dEtczZt-Z_UhH3AAAM} has been added to array at 2016_1_22-13-47-35
+#User has been disconnected at 2016_1_22-13-47-47
+#{name: sven, socket: UOR52JomIzp7I1XXAAAN} has been added to array at 2016_1_22-13-47-49
+#User has been disconnected at 2016_1_22-13-48-20
+#{name: sven, socket: nBvptCW0zGvejO-6AAAO} has been added to array at 2016_1_22-13-48-22
+#User has been disconnected at 2016_1_22-13-48-46
+#{name: sven, socket: KInOuubOxdmwE4toAAAP} has been added to array at 2016_1_22-13-48-49
+#User has been disconnected at 2016_1_22-13-50-26
+#{name: sven, socket: kFk-5pZTSt2j59GBAAAQ} has been added to array at 2016_1_22-13-50-28
+#User has been disconnected at 2016_1_22-13-50-55
+#{name: sven, socket: YFHa4vVj7TBSBWnIAAAR} has been added to array at 2016_1_22-13-50-57
+#User has been disconnected at 2016_1_22-13-53-9
+#{name: sven, socket: BB_pvMHE-ahx-U_1AAAS} has been added to array at 2016_1_22-13-53-11
+#User has been disconnected at 2016_1_22-13-53-37
+#{name: sven, socket: TV-KzIVDgVgYniI6AAAT} has been added to array at 2016_1_22-13-53-39
+#User has been disconnected at 2016_1_22-13-59-38
+#{name: sven, socket: oi_ndawLcUSLZEIAAAAU} has been added to array at 2016_1_22-13-59-44
+#User has been disconnected at 2016_1_22-14-01-31
+#{name: sven, socket: s7a8bav3KdlBTPMjAAAV} has been added to array at 2016_1_22-14-01-33
+#User has been disconnected at 2016_1_22-14-02-35
+#{name: sven, socket: 70DT889aJs6tB_6fAAAW} has been added to array at 2016_1_22-14-02-37
+#User has been disconnected at 2016_1_22-14-02-45
+#{name: sven, socket: Plkcg5YDZzOHOBEvAAAX} has been added to array at 2016_1_22-14-02-47
+#User has been disconnected at 2016_1_22-14-03-29
+#{name: sven, socket: SBaaL4X-HglKthw2AAAY} has been added to array at 2016_1_22-14-03-31
+#User has been disconnected at 2016_1_22-14-03-40
+#{name: sven, socket: 44dCPJSPWFAUKgjCAAAZ} has been added to array at 2016_1_22-14-03-42
+#User has been disconnected at 2016_1_22-14-04-4
+#{name: sven, socket: JPFdS4JL4eBd5Yy4AAAa} has been added to array at 2016_1_22-14-04-6
+#User has been disconnected at 2016_1_22-14-58-18
+#{name: sven, socket: HLb_kQJjbjp1Va0kAAAb} has been added to array at 2016_1_22-14-58-19
+#User has been disconnected at 2016_1_22-14-58-51
+#{name: sven, socket: V9ODqDdMwwwgM7sSAAAc} has been added to array at 2016_1_22-14-58-53
+#User has been disconnected at 2016_1_22-14-59-22
+#{name: sven, socket: GEAMrCY2P4Q-PFrNAAAd} has been added to array at 2016_1_22-14-59-23
+#User has been disconnected at 2016_1_22-14-59-36
+#{name: sven, socket: KIMzJ3o6oR3aL299AAAe} has been added to array at 2016_1_22-14-59-38
+#User has been disconnected at 2016_1_22-14-59-48
+#{name: sven, socket: CcWe0CjFLeKgQ0YuAAAf} has been added to array at 2016_1_22-14-59-49
+#User has been disconnected at 2016_1_22-14-59-55
+#{name: sven, socket: 7zFXqgYU5VjH1MfGAAAg} has been added to array at 2016_1_22-14-59-56
+#User has been disconnected at 2016_1_22-15-00-3
+#{name: sven, socket: kc1g2ANoiZhykG6PAAAh} has been added to array at 2016_1_22-15-00-4
+#User has been disconnected at 2016_1_22-15-00-37
+#{name: sven, socket: s_JoLRRxtWjxQLpZAAAi} has been added to array at 2016_1_22-15-00-39
+#User has been disconnected at 2016_1_22-15-02-16
+#{name: sven, socket: 4FCqoJigDdwwGzxTAAAj} has been added to array at 2016_1_22-15-02-18
+#User has been disconnected at 2016_1_22-15-03-35
+#{name: sven, socket: _wqmz-4vF6TTadGgAAAk} has been added to array at 2016_1_22-15-03-37
+#User has been disconnected at 2016_1_22-15-04-13
+#{name: sven, socket: OvLC13VhwJrubN_RAAAl} has been added to array at 2016_1_22-15-04-15
+#User has been disconnected at 2016_1_22-15-05-2
+#{name: sven, socket: UPlpShd1D3F9dOnmAAAm} has been added to array at 2016_1_22-15-05-4
+#User has been disconnected at 2016_1_22-15-05-14
+#{name: sven, socket: UA8yBHR0VtIndWABAAAn} has been added to array at 2016_1_22-15-05-16
+#User has been disconnected at 2016_1_22-15-12-42
+#{name: sven, socket: -NQigm08NmSPZVBUAAAo} has been added to array at 2016_1_22-15-12-43
+#User has been disconnected at 2016_1_22-15-13-5
+#{name: sven, socket: H94nvtwN2TkwiSzMAAAp} has been added to array at 2016_1_22-15-13-6
+#User has been disconnected at 2016_1_22-15-13-17
+#{name: sven, socket: 0ccgkMlbTitiDrgCAAAq} has been added to array at 2016_1_22-15-13-18
+#User has been disconnected at 2016_1_22-15-15-49
+#{name: sven, socket: ujSK7U3Jqk6HfD9YAAAr} has been added to array at 2016_1_22-15-15-50
+#User has been disconnected at 2016_1_22-15-18-4
+#{name: sven, socket: 936HYEFPr4fhk1BZAAAs} has been added to array at 2016_1_22-15-18-5
+#User has been disconnected at 2016_1_22-15-20-35
+#{name: sven, socket: Uc0UW5luSPvvGn1ZAAAt} has been added to array at 2016_1_22-15-20-37
+#User has been disconnected at 2016_1_22-15-24-17
+#{name: sven, socket: -QP583n2KezuRZPuAAAu} has been added to array at 2016_1_22-15-24-18
+#User has been disconnected at 2016_1_22-15-26-50
+#{name: sven, socket: emO6dSCNGBJjgfT2AAAv} has been added to array at 2016_1_22-15-26-52
+#User has been disconnected at 2016_1_22-15-29-5
+#{name: sven, socket: DZQuk9Cu_hEQ-QQQAAAw} has been added to array at 2016_1_22-15-29-7
+#User has been disconnected at 2016_1_22-15-29-46
+#{name: sven, socket: N3h9jTI-x3jdKme0AAAx} has been added to array at 2016_1_22-15-29-47
+#User has been disconnected at 2016_1_22-15-30-21
+#{name: sven, socket: Ypbdo0tBJ6vY2M6xAAAy} has been added to array at 2016_1_22-15-30-22
+#User has been disconnected at 2016_1_22-15-30-23
+#{name: sven, socket: KfqatvMMV85jCAd0AAAz} has been added to array at 2016_1_22-15-30-24
+#User has been disconnected at 2016_1_22-15-30-54
+#{name: sven, socket: 0O16I-8ocF93AhtaAAA0} has been added to array at 2016_1_22-15-30-55
+#User has been disconnected at 2016_1_22-15-31-16
+#{name: sven, socket: Zgp7eKsAnR5UqalaAAA1} has been added to array at 2016_1_22-15-31-17
+#User has been disconnected at 2016_1_22-15-32-10
+#{name: sven, socket: PufldZ7ho5CW6MqZAAA2} has been added to array at 2016_1_22-15-32-13
+#User has been disconnected at 2016_1_22-15-32-40
+#{name: sven, socket: NCvxSyxE7JpQz-fbAAA3} has been added to array at 2016_1_22-15-32-41
+#User has been disconnected at 2016_1_22-15-33-1
+#{name: sven, socket: jD7gW4OF2B0nrv-VAAA4} has been added to array at 2016_1_22-15-33-2
+#User has been disconnected at 2016_1_22-15-35-6
+#{name: sven, socket: Wrkb5PqQSKTGbEAbAAA5} has been added to array at 2016_1_22-15-35-7
+#User has been disconnected at 2016_1_22-15-35-24
+#{name: sven, socket: B7RyXm_PTZaezgjGAAA6} has been added to array at 2016_1_22-15-35-25
+#User has been disconnected at 2016_1_22-15-35-51
+#{name: sven, socket: MUUGblaqHUpVfBQqAAA7} has been added to array at 2016_1_22-15-35-52
+#User has been disconnected at 2016_1_22-15-36-52
+#{name: sven, socket: 6FZB5ky1duXAGfVHAAA8} has been added to array at 2016_1_22-15-36-53
+#User has been disconnected at 2016_1_22-15-39-58
+#{name: sven, socket: omC8SdkFG1CguiqhAAA9} has been added to array at 2016_1_22-15-40-0
+#User has been disconnected at 2016_1_22-15-41-27
+#{name: sven, socket: zWoR7MJeiaW2L49gAAA-} has been added to array at 2016_1_22-15-41-29
+#User has been disconnected at 2016_1_22-15-42-6
+#{name: sven, socket: oE6MmmQCLXB1sYriAAA_} has been added to array at 2016_1_22-15-42-8
+#a new requirement has been created at 2016_1_22-15-42-36
+#User has been disconnected at 2016_1_22-15-43-44
+#{name: sven, socket: v2uHEZyS4BY_6nOMAABA} has been added to array at 2016_1_22-15-43-46
+#User has been disconnected at 2016_1_22-15-43-54
+#{name: sven, socket: 5_zBPaYnnPSMLvKZAABB} has been added to array at 2016_1_22-15-43-55
+#User has been disconnected at 2016_1_22-15-44-37
+#{name: sven, socket: KLHblARb8dDnFbCoAABC} has been added to array at 2016_1_22-15-44-38

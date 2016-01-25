@@ -1,5 +1,5 @@
 // Add a connect listener
-var socket = io.connect('ws://192.168.1.164:3000');
+var socket = io.connect('http://192.168.1.164:3000');
 
 // VARS
 var feedEmpty=true;
@@ -44,16 +44,18 @@ if(window.location.pathname.search("summary") != -1 ){
 		$("#dialog_team_modal").hide();
 		$("#dialog").hide();
 		$("#error").hide();
-		$('#changeCategory').hide();
+		//$('#changeCategory').hide();
 		$('#version').text(version); 
 		$('#version2').text(version);
-		
-		//category dropdown functions -> elements appear on mouseover and disappear on mouseleave 
-		$('#dropButton').mouseover(function(){
-			$('#changeCategory').show();
-		});
-		$('#changeCategory').mouseleave(function(){
-			$(this).hide();
+		$('#changeCategory').change(function(){
+			var category = this.value;
+			if(category != ""){
+				getRequirements("cat_"+category);
+			} else {
+				//if "All" is selected
+				getRequirements();
+			}
+			
 		});
 		
 		window.setInterval(function(){clearFeed();},5000);
@@ -61,15 +63,7 @@ if(window.location.pathname.search("summary") != -1 ){
 		enableTooltips();
 		refreshTeamData();
 		
-		$('#dropToggle').click(function(){
-			if(toggle){
-				$('#changeCategory').hide();
-			} else {
-				$('#changeCategory').show();
-			}
-			toggle = !toggle;
-		});
-				//enter bestÃ¤tigung beim erstellen von teams
+		//enter bestÃ¤tigung beim erstellen von teams
 		$("#team_name").keypress(function(event){
 			var keycode = (event.keyCode ? event.keyCode : event.which);
 			if(keycode == '13'){
@@ -169,30 +163,46 @@ socket.on('connect',function() {
 	  if(isBlocked() == "false"){ getRequirements();}
     });
 
-	socket.on('getRequirements',function(requirements) {
-      console.log(requirements);
-	  
-	  displayedRequirements=requirements;
-	  setTable(requirements);
+	socket.on('getRequirements',function(data) {
+	
+	  if(data.category == ""){
+		  //old headline without category part --> cut off by split
+		  $('#headline_dashboard').html(($('#headline_dashboard').html()).split("|")[0]);
+	  } else {
+		  var categoryToDisplay = data.category;
+		  var previousHeadline = ($('#headline_dashboard').html()).split("|")[0];
+		  var newHeadline = previousHeadline+" | "+category.word+": <span class='headline'>"+categoryToDisplay+"</span>";
+		  $('#headline_dashboard').html(newHeadline);
+	  }
+      
+      console.log(categoryToDisplay);
+      console.log(data.requirements);
+	 
+      displayedRequirements=data.requirements;
+	  setTable(data.requirements);
 	  //sortById(requirements);
-	  refreshExport(requirements);
+	  refreshExport(data.requirements);
 	  setBlock(false);
-	  console.log("now filling dropdown with items");
+	 // console.log("now filling dropdown with items");
 	  
     });
 	
 	socket.on('fillCategorySelector',function(categories){
 		var body = $('#changeCategory');
-		var items = "";
+		var items = "<option selected disabled>"+category.word+"</option>";
+		items += "<option value=''>All</option>";
+	
+		
 		console.log("dropdown got categories");
 		
 		for(var i = 0;i < categories.length; i++){
-			items+="<li><a onClick=\"getRequirements(\'cat_"+categories[i].name+"\')\">"+categories[i].name+"</a></li>";
+			items+="<option value="+categories[i].name+">"+categories[i].name+"</option>";
 		}
-		//console.log(items);
+		//onClick=\"getRequirements(\'cat_"+categories[i].name+"\')\"
 		body.html(items);
-		//body.show();
 	});
+	
+
 	
 	socket.on('youBeenAdded',function(){
 		insertIntoFeed(team.added);
@@ -1095,7 +1105,11 @@ function createCategory(){
 function submitCategory(){
 	var cat = $('#catField').val();
 	if((cat != "") && (cat.indexOf("_")==-1)){
-		socket.emit('submitCategory',{category: cat, username: getUserName()});
+		if(cat.length < 25){
+			socket.emit('submitCategory',{category: cat, username: getUserName()});
+		} else {
+			$('#error').text(category.long).slideDown(500).delay(1000).slideUp(500);
+		}
 	} else {
 		$('#error').text(category.fill).slideDown(500).delay(1000).slideUp(500);
 	}
@@ -1204,15 +1218,14 @@ function loadTeamOptions(){
 //var teamname;
 
 socket.on('teamChanged',function(data){
-	 insertIntoFeed("Team wurde geändert");
+	 insertIntoFeed("Team wurde geï¿½ndert");
 });
 
-socket.on('createTeam',function(code){
+
+socket.on('createDefaultCategory',function(code){
+	console.log("created uncategorized category");
 	var mess;
-	switch (code) {
-		case 0: mess = createTeam.mess0; socket.emit('submitCategory',{category: "uncategorized", username: getUserName()});break;
-		case 1: mess = createTeam.mess1; break;
-	}
+
 	//teams neu laden --> meine Teams / nur wenn create erfolgreich
 	if(code == 0){
 		refreshTeamData(true);	
@@ -1225,10 +1238,6 @@ socket.on('createTeam',function(code){
 		// sonst zeige nur Fehlermeldung
 		window.setTimeout(function(){$("#head_modal_dash_team").text(mess).slideDown(500).delay(1000).slideUp(500);},3000);
 	}
-});
-
-socket.on('createDefaultCategory',function(){
-	console.log("created uncategorized category");
 });
 
 socket.on('insertTeamOwner', function(data){
@@ -1327,7 +1336,7 @@ socket.on('getMyGroups',function(groups){
 					</tr>";	
 								
 					//Ã¼berschrift anpassen
-						$("#headline_dashboard").text(otherContent.head_dash2+curTeam);
+						$("#headline_dashboard").html(otherContent.head_dash2+"<span class='headline'>"+curTeam+"</span>");
 
 						//bei teams, die der user erstellt hat, in welchen er aber nicht mitglied ist
 		} else {
@@ -1795,7 +1804,7 @@ function stressTest(){
 	
 	var requirement = {
 			user: "sven",
-			req : "11 &req# muss &req# 1 &req#  &req# fähig sein, &req# 11 &req# 11.",
+			req : "11 &req# muss &req# 1 &req#  &req# fï¿½hig sein, &req# 11 &req# 11.",
 			prio: "2",
 			id: 99,
 			status: "im Backlog",

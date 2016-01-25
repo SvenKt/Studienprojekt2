@@ -1,0 +1,11 @@
+Logfile startet on 2016_1_14-13-09-12
+#connected to database at 2016_1_14-13-09-13
+#{name: sven, socket: gZRcqpeZvEqIre5MAAAB} has been added to array at 2016_1_14-13-09-13
+#User has been disconnected at 2016_1_14-13-18-45
+#{name: sven, socket: dfl2xw5iwfFvqKeRAAAC} has been added to array at 2016_1_14-13-18-47
+#team owner has been inserted as team member at 2016_1_14-13-18-52
+#a new requirement has been created at 2016_1_14-13-19-32
+#a new requirement has been created at 2016_1_14-13-19-38
+#User has been disconnected at 2016_1_14-13-22-12
+#{name: sven, socket: 5g4vMjhXX41XjX5vAAAD} has been added to array at 2016_1_14-13-22-14
+#team owner has been inserted as team member at 2016_1_14-13-22-25

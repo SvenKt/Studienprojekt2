@@ -1,0 +1,11 @@
+Logfile startet on 2016_1_13-11-01-9
+#connected to database at 2016_1_13-11-01-10
+#User has been disconnected at 2016_1_13-11-01-44
+#User has been disconnected at 2016_1_13-11-01-46
+#an e-mail has been send at 2016_1_13-11-02-13
+#User has been disconnected at 2016_1_13-11-03-4
+#database test successful at 2016_1_13-11-03-21
+#database configuration has been saved at 2016_1_13-11-03-25
+#User has been disconnected at 2016_1_13-11-03-25
+#User has been disconnected at 2016_1_13-11-03-33
+#User has been disconnected at 2016_1_13-11-03-38

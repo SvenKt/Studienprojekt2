@@ -1,0 +1,30 @@
+Logfile startet on 2016_1_14-11-16-1
+#connected to database at 2016_1_14-11-16-2
+#{name: sven, socket: Y26BDT0u-ezBVEUXAAAA} has been added to array at 2016_1_14-11-16-6
+#User has been disconnected at 2016_1_14-11-17-14
+#{name: sven, socket: 2Jkmo7xFSIwuqmjzAAAC} has been added to array at 2016_1_14-11-17-16
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-23
+#a new requirement has been created at 2016_1_14-11-17-24
+#a new requirement has been created at 2016_1_14-11-17-24
+#a new requirement has been created at 2016_1_14-11-17-24
+#a new requirement has been created at 2016_1_14-11-17-24
+#a new requirement has been created at 2016_1_14-11-17-24
+#a new requirement has been created at 2016_1_14-11-17-24
+#a new requirement has been created at 2016_1_14-11-17-24
+#a new requirement has been created at 2016_1_14-11-17-24
+#a new requirement has been created at 2016_1_14-11-17-24

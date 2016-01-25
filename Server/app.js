@@ -15,13 +15,22 @@ var express = require('express')
 , 	nconf = require('nconf')
 ,	logger = require('./logVariables')
 , 	error = logger.error
-,	trace = logger.trace;
+,	trace = logger.trace
+,	dbSpecified=false
+,	port=3000;
 
 
+////
+//SERVER START MESSAGES
+////
+console.log("\n\n");
+console.log("Red:Wire - Requirements Engineering Online Tool");
+console.log("Server is running on port "+port);
+console.log("\n\n\n\n\n");
 
 //////////////////
-//F‹R CORS
-//AUﬂERDEM M‹SSEN PORTS FREIGEGEBEN WERDEN, DAMIT KEINE FEHLERMELDUNG WEGEN CORS KOMMT
+//FÔøΩR CORS
+//AUÔøΩERDEM MÔøΩSSEN PORTS FREIGEGEBEN WERDEN, DAMIT KEINE FEHLERMELDUNG WEGEN CORS KOMMT
 app.use('/',function(req,res,next){
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -180,28 +189,31 @@ function traceLog(mess) {
 // DEFINE DATABASE CREDENTIALS (FROM CONFIG FILE)
 ///////////////////////////////////////////////////
 
-var db = mysql.createConnection({
-    host: db_connect.host,
-    user: db_connect.user,
-	password: db_connect.pass,
-    database: db_connect.name
-});
-
+if(db_connect.host != undefined){
+	dbSpecified = true;
+	console.log("db:"+db_connect);
+	var db = mysql.createConnection({
+	    host: db_connect.host,
+	    user: db_connect.user,
+		password: db_connect.pass,
+	    database: db_connect.name
+	});
+}
 
 ////////////////////////////////////
 // LOG IN DATABASE
 ////////////////////////////////////
-db.connect(function(err){
-    if (err) {
-		logerr("couldn't connect to database, check credentials");
-		throw err;
-	}//console.log(err)
-	traceLog("connected to database");
-	
-});
-
-//server hˆrt auf port 3000 --> verbindung mittels "localhost:3000"
-server.listen(3000);
+if (dbSpecified){
+	db.connect(function(err){
+	    if (err) {
+			logerr("couldn't connect to database, check credentials");
+			throw err;
+		}//console.log(err)
+		traceLog("connected to database");
+	});
+}
+//server hÔøΩrt auf port 3000 --> verbindung mittels "localhost:3000"
+server.listen(port);
 
 
 // nutzt obj.socket als attribut, nur f√ºr array "users" und andere arrays/objekte mit attribut "socket".
@@ -546,8 +558,10 @@ socket.on('writeDatabaseConfiguration',function(data){
 		var query="SELECT   project_id, status,  relations, requirements.id as reqid, requirement, priority,  timestamp";
 		var str = "cat_";	//categories have a prefix to differ between normal search queries
 		var view = data.view;
-		
-		
+		var returnValue = {
+				requirements: [],
+				category: ""
+		};
 		if (typeof data.search != "undefined"){
 			if(data.search.substring(0,str.length) == str){
 				query+=", categories.name, categories.id as catid";
@@ -566,7 +580,9 @@ socket.on('writeDatabaseConfiguration',function(data){
 		
 		if (typeof data.search != "undefined"){		
 			if(data.search.substring(0,str.length) == str){
-				query+=" AND categories.name = '"+data.search.split("_")[1]+"'"; 
+				query+=" AND categories.name = '"+data.search.split("_")[1]+"'";
+				returnValue.category = data.search.split("_")[1];
+				console.log("search: "+data.search);	
 			} 
 		}
 		
@@ -583,14 +599,16 @@ socket.on('writeDatabaseConfiguration',function(data){
 		}
 		
 		query += ";";
-
+		console.log(query);
 		var requirements = db.query(query,  function(err, rows, fields){
 			if (err) {sendMail(error.getRequirements); logerr(err); return;}
 			for(var i=0;i<rows.length;i++){
 				requirementsArr.push(rows[i]);
-				//console.log(rows[i]);
+				console.log(rows[i]);
 			}
-			socket.emit('getRequirements',requirementsArr);
+			
+			returnValue.requirements = requirementsArr;
+			socket.emit('getRequirements',returnValue);
 		});
 	});
 	

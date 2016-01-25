@@ -1,0 +1,15 @@
+Errorlog file startet on 2016_1_13-11-01-9
+#17 could not load any user from database. probably no connection established or connection lost. database error at 2016_1_13-11-01-30
+#Error: ER_NO_DB_ERROR: No database selected at 2016_1_13-11-01-30
+#Error: ER_NO_DB_ERROR: No database selected at 2016_1_13-11-01-30
+#17 could not load any user from database. probably no connection established or connection lost. database error at 2016_1_13-11-01-30
+#17 could not load any user from database. probably no connection established or connection lost. database error at 2016_1_13-11-01-30
+#Error: ER_NO_DB_ERROR: No database selected at 2016_1_13-11-01-30
+#17 could not load any user from database. probably no connection established or connection lost. database error at 2016_1_13-11-01-31
+#Error: ER_NO_DB_ERROR: No database selected at 2016_1_13-11-01-31
+#Error: ER_NO_DB_ERROR: No database selected at 2016_1_13-11-03-44
+#17 could not load any user from database. probably no connection established or connection lost. database error at 2016_1_13-11-03-44
+#17 could not load any user from database. probably no connection established or connection lost. database error at 2016_1_13-11-03-45
+#Error: ER_NO_DB_ERROR: No database selected at 2016_1_13-11-03-45
+#Error: ER_NO_DB_ERROR: No database selected at 2016_1_13-11-03-45
+#17 could not load any user from database. probably no connection established or connection lost. database error at 2016_1_13-11-03-45

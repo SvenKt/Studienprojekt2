@@ -41,7 +41,9 @@ var category = {
 	feed0:"",
 	feed1:"",
 	feed2:"",
-	fill:""
+	fill:"",
+	word:"",
+	long:"",
 }
 
 var userdel_admin = {
@@ -341,7 +343,8 @@ function defineTranslationVars(lang){
 		category.feed1="Kategorie wurde gelöscht";
 		category.feed2="Kategorie wurde editiert";
 		category.fill="Bitte einen Namen für die Kategorie eingeben / Keine unerlaubten Zeichen nutzen {_}";
-		
+		category.word="Kategorie";
+		category.long="Kategorie darf maximal 25 Zeichen beinhalten";
 			
 		admin.headline="Übersicht";
 	
@@ -398,7 +401,7 @@ function defineTranslationVars(lang){
 		otherContent.sfp = 'Suche...';
 		otherContent.news ='Klicken zum Aktualisieren';
 		otherContent.head_dash1= "Anforderungen";
-		otherContent.head_dash2= "Anforderungen von Team ";
+		otherContent.head_dash2= "Team: ";
 		otherContent.news_text="Aktualisieren   ";
 		otherContent.download="Bitte wähle den Dateityp: ";
 		
@@ -535,6 +538,8 @@ function defineTranslationVars(lang){
 		category.feed1="Category deleted";
 		category.feed2="Category edited";
 		category.fill="Please insert a category name / Do not use invalid characters {_}";
+		category.word="Category";
+		category.long="Category must contain less than 25 characters.";
 		
 		admin.headline="Dashboard";
 	
@@ -593,7 +598,7 @@ function defineTranslationVars(lang){
 		otherContent.sfp = 'pattern...';
 		otherContent.news ='Click to update';
 		otherContent.head_dash1= "Requirements";
-		otherContent.head_dash2= "Requirements of team ";
+		otherContent.head_dash2= "Team: ";
 		otherContent.news_text="Update   ";
 		otherContent.download="Please choose the file type: ";
 		

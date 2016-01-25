@@ -1,0 +1,3 @@
+Logfile startet on 2016_1_14-11-33-52
+#connected to database at 2016_1_14-11-33-52
+#{name: sven, socket: KW8yuoCFIJ1SjYtsAAAA} has been added to array at 2016_1_14-11-33-52

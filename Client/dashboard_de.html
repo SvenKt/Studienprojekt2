@@ -73,23 +73,21 @@
 				<div class="clickable" id="languageSwitcher">
 					<img title="Switch to english language" onClick="switchToEN()" src="img/uk.png"></img>
 				</div>
-				<!-- bootstrap dropdown-->
-				<div class="btn-group">
-					<button type="button" onClick='getRequirements();' id='dropButton'class="btn btn-primary">Category</button>
-					<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" id='dropToggle' aria-haspopup="true" aria-expanded="false">
-						<span class="caret"></span>
-						<span class="sr-only">Toggle Dropdown</span>
-					</button>
-					<ul id='changeCategory' class="dropdown-menu">
-					</ul>
-				</div>
-				<!--end-->
 				<div class="checkbox" id="disChecker">
 					<input  id="helpCheckbox" type="checkbox" value="Hilfe ausschalten">Tooltips</input>
 				</div>
 
 				</br>
-				<h2 id="headline_dashboard"></h2>
+				<div id="head_row" class='row'>
+					<label class='col-md-10'>
+						<h2 id="headline_dashboard"></h2>
+					</label>
+					<label  class='col-md-2'> 
+						<div  class="btn-group" id='head_row_dropdown'>
+							<select class='form-control' id='changeCategory' placeholder="Kategorien"></select>
+						</div>
+					</label>
+				</div>
 				<hr>
 					<p class="panel panel-warning"id="error"></p>
 					<div class="panel panel-warning" id="dialog"></div>
