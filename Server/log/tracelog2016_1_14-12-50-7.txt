@@ -1,4 +1,0 @@
-Logfile startet on 2016_1_14-12-50-7
-#connected to database at 2016_1_14-12-50-7
-#{name: sven, socket: 9g2v3ClazXpwUCoHAAAA} has been added to array at 2016_1_14-12-50-7
-#team owner has been inserted as team member at 2016_1_14-12-50-10

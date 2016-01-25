@@ -1,4 +1,0 @@
-Logfile startet on 2016_1_12-16-09-58
-#connected to database at 2016_1_12-16-09-59
-#{name: sven, socket: KJTMZ7BFZuoJXRVaAAAA} has been added to array at 2016_1_12-16-09-59
-#a new requirement has been created at 2016_1_12-16-10-21

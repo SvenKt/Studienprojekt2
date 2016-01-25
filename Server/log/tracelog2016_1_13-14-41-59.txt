@@ -1,7 +1,0 @@
-Logfile startet on 2016_1_13-14-41-59
-#connected to database at 2016_1_13-14-41-59
-#{name: sven, socket: u5D_rE70Wz1bloiZAAAA} has been added to array at 2016_1_13-14-42-2
-#{name: sven, socket: fn_U3LpVlAS0SPOrAAAB} has been added to array at 2016_1_13-14-42-3
-#User has been disconnected at 2016_1_13-14-42-12
-#{name: sven, socket: nrd_uOQJFuuAW3-sAAAC} has been added to array at 2016_1_13-14-42-16
-#User has been disconnected at 2016_1_13-14-42-18

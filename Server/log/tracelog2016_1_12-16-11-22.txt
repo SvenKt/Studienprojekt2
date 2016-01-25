@@ -1,7 +1,0 @@
-Logfile startet on 2016_1_12-16-11-22
-#connected to database at 2016_1_12-16-11-22
-#{name: sven, socket: K2wrO0hjLI6tWRFaAAAA} has been added to array at 2016_1_12-16-11-22
-#User has been disconnected at 2016_1_12-16-11-25
-#{name: sven, socket: caTs7-PechIKlhUhAAAB} has been added to array at 2016_1_12-16-11-26
-#a new requirement has been created at 2016_1_12-16-11-35
-#a new requirement has been created at 2016_1_12-16-12-15
