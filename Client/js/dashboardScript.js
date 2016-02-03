@@ -111,7 +111,15 @@ if(window.location.pathname.search("summary") != -1 ){
 	}
 });
 
-
+function refreshRequirements(){
+	  try {
+		  var currentCategory = $("#headline_dashboard").text().split("|")[1].split(":")[1].substring(1);
+		  console.log("category: "+currentCategory);
+		  getRequirements("cat_"+currentCategory);
+	  } catch(e) {
+		  getRequirements();
+	  }
+}
 
 if(window.location.pathname.search("dash") != -1 ){
 socket.on('connect',function() {
@@ -136,8 +144,9 @@ socket.on('connect',function() {
     socket.on('newReq',function(user) {
       var mess = user+reqForm.feed_create;
 	  insertIntoFeed(mess);
-	  if(isBlocked() == "false"){ getRequirements();}
-	  console.log("hey, a new requirement!");
+	  if(isBlocked() == "false"){ 	
+		  refreshRequirements();
+	  }
 	});
 	
 	 socket.on('reqFail',function() {
@@ -154,13 +163,13 @@ socket.on('connect',function() {
 	socket.on('editReq',function(user) {
       var mess = user+reqForm.feed_edit;
 	  insertIntoFeed(mess);
-	  if(isBlocked() == "false"){ getRequirements();}
+	  if(isBlocked() == "false"){ refreshRequirements();}
     });
 	
 	socket.on('deleteReq',function(user) {
 	var mess = user+reqForm.feed_del;
 	  insertIntoFeed(mess);
-	  if(isBlocked() == "false"){ getRequirements();}
+	  if(isBlocked() == "false"){ refreshRequirements();}
     });
 
 	socket.on('getRequirements',function(data) {
@@ -174,9 +183,6 @@ socket.on('connect',function() {
 		  var newHeadline = previousHeadline+" | "+category.word+": <span class='headline'>"+categoryToDisplay+"</span>";
 		  $('#headline_dashboard').html(newHeadline);
 	  }
-      
-      console.log(categoryToDisplay);
-      console.log(data.requirements);
 	 
       displayedRequirements=data.requirements;
 	  setTable(data.requirements);
@@ -1087,6 +1093,8 @@ var patchnotes = "\
 	
 function createCategory(){
 	var body=$('#content');
+	//set sessionstorage item to insert mode --> submitCategory();
+	setSessionItem("insertCategory",true);
 	getCategories(getUserName(),0);
 	body.html("	<div class='col-md-4'><input class='form-control' type='text' placeholder='Neue Kategorie' id='catField' ></input></div>\
 				<div class='col-md-2'><button id='sm_cat' onClick='submitCategory()' class='btn btn-default'><span id='glyph' class='glyphicon glyphicon-plus' aria-hidden='true'></span></button></div>\
@@ -1094,9 +1102,14 @@ function createCategory(){
 	setBlock(true);
 	
 	$("#catField").keypress(function(event){
+		console.log(getSessionItem("insertCategory"));
 		var keycode = (event.keyCode ? event.keyCode : event.which);
 		if(keycode == '13'){
-			submitCategory();
+			if (getSessionItem("insertCategory") == "true"){
+				submitCategory();
+			} else {
+				submitEdit(getSessionItem("editedCategory"));
+			}
 		}
 		event.stopPropagation();
 	});
@@ -1104,7 +1117,7 @@ function createCategory(){
 
 function submitCategory(){
 	var cat = $('#catField').val();
-	if((cat != "") && (cat.indexOf("_")==-1)){
+	if((cat != "") && (cat.indexOf("_")==-1) && (cat.indexOf(" ") == -1)){
 		if(cat.length < 25){
 			socket.emit('submitCategory',{category: cat, username: getUserName()});
 		} else {
@@ -1121,11 +1134,12 @@ socket.on('submitCategory',function(data){
 	
 	switch(data.code){
 		case 0: mess = category.mess0; 	insertIntoFeed(data.username+": "+category.feed0); break;
-		case 1: mess = category.mess1; break;
-		case 2: mess = category.mess2; break;		
+		case 1: mess = category.mess1;  break;
+		case 2: mess = category.mess2;  break;		
 		case 3: mess = category.mess3; break;		
 	}
-	//$('#error').text(mess).slideDown(500).delay(1000).slideUp(500);
+	console.log(mess);
+	$('#error').text(mess).slideDown(500).delay(1000).slideUp(500);
 	getCategories(getUserName(),0);
 });
 
@@ -1191,6 +1205,12 @@ socket.on('getEditData',function(data){
 	$('#sm_cat').attr("onClick","submitEdit("+data.id+")");
 	$('#glyph').removeClass("glyphicon-plus");
 	$('#glyph').addClass("glyphicon-ok");
+	//set keypress event on edit mode --> submitCategory changes to submitEdit();
+	setSessionItem("insertCategory",false);
+	console.log("edit: "+getSessionItem("insertCategory"));
+	
+	//set sessionstorage item for keypress function in submitCategory() --> toggles 
+	setSessionItem("editedCategory",data.id);
 });
 
 function submitEdit(id){
@@ -1199,8 +1219,13 @@ function submitEdit(id){
 	socket.emit('submitEdit',{id: id, newName:newName});
 }
 
-socket.on('submitEdit',function(){
-	createCategory();
+socket.on('submitEdit',function(code){
+	console.log(code);
+	if(code == 1){
+		$('#error').text(category.mess3).slideDown(500).delay(1000).slideUp(500);
+	} else {
+		createCategory();
+	}
 });
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////DASHBOARD//////END//////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1780,9 +1805,18 @@ function configureRedWire(){
 socket.on('returnToIndex',function(){
 	location.replace('../index.html');
 });
-////////////////////////////////////////////////////////////////////////////////////////////
-//DEBUG
-////////////////////////
+
+
+
+
+
+
+
+
+
+/////////
+//DEBUG//
+/////////
 var testing = {
 		interval:""
 }
@@ -1826,4 +1860,26 @@ function stressTest(){
 function stopTest(){
 	clearInterval(testing.interval);
 }
+
+function pixelmode(){
+  	$('body').css({
+  		"font-family": "'Press Start 2P', sans-serif",
+  		"font-size" : "95%"			
+  	});
+}
+
+//SESSIONSTORAGE FUNCTIONS
+
+function setSessionItem(key,val){
+	sessionStorage.setItem(key,val);
+}
+
+function getSessionItem(key){
+	return sessionStorage.getItem(key);
+}
+
+function removeSessionItem(key){
+	sessionStorage.removeItem(key);
+}
+
 

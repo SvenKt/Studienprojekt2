@@ -30,7 +30,7 @@ console.log("\n\n\n\n\n");
 
 //////////////////
 //Fï¿½R CORS
-//AUï¿½ERDEM Mï¿½SSEN PORTS FREIGEGEBEN WERDEN, DAMIT KEINE FEHLERMELDUNG WEGEN CORS KOMMT
+//AUßERDEM Mï¿½SSEN PORTS FREIGEGEBEN WERDEN, DAMIT KEINE FEHLERMELDUNG WEGEN CORS KOMMT
 app.use('/',function(req,res,next){
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -582,7 +582,7 @@ socket.on('writeDatabaseConfiguration',function(data){
 			if(data.search.substring(0,str.length) == str){
 				query+=" AND categories.name = '"+data.search.split("_")[1]+"'";
 				returnValue.category = data.search.split("_")[1];
-				console.log("search: "+data.search);	
+				//console.log("search: "+data.search);	
 			} 
 		}
 		
@@ -599,12 +599,12 @@ socket.on('writeDatabaseConfiguration',function(data){
 		}
 		
 		query += ";";
-		console.log(query);
+		//console.log(query);
 		var requirements = db.query(query,  function(err, rows, fields){
 			if (err) {sendMail(error.getRequirements); logerr(err); return;}
 			for(var i=0;i<rows.length;i++){
 				requirementsArr.push(rows[i]);
-				console.log(rows[i]);
+				//console.log(rows[i]);
 			}
 			
 			returnValue.requirements = requirementsArr;
@@ -1463,7 +1463,8 @@ socket.on('deleteAllUsersFromTeam',function(data){
 /////
 
 socket.on('submitCategory',function(data){
-	console.log("submit "+data.category);
+	//console.log("submit "+data.category);
+	traceLog("submit "+data.category);
 	var teamid;
 	var exists=false;
 	var members = [];
@@ -1487,15 +1488,15 @@ socket.on('submitCategory',function(data){
 			for(var i=0;i<rows.length;i++){
 				if(rows[i].name == data.category){
 					exists=true;
-					socket.emit('submitCategory',3);
+					socket.emit('submitCategory',{username: data.username, code:3});
 				}
 			} 	
 			//check if category exists
 			if(!exists) {
 				var query = "insert into categories (name, team_id) values ('"+data.category+"',"+teamid+");";
 				var getTeamName= db.query(query, function(err,rows,fields){
-					if (err) {sendMail(error.submitCategory); logerr(err); socket.emit('submitCategory',1); return;}
-					socket.emit('submitCategory',0);
+					if (err) {sendMail(error.submitCategory); logerr(err); socket.emit('submitCategory',{username: data.username, code:1}); return;}
+					//socket.emit('submitCategory',0);
 						
 					//get members
 					for(var i=0;i<users.length;i++){
@@ -1509,10 +1510,10 @@ socket.on('submitCategory',function(data){
 						io.to(members[i].socket).emit("submitCategory", {username: data.username, code:0});	
 					}
 				});
-			}
+			} 
 		});	
 	} else {
-		socket.emit('submitCategory',2);
+		socket.emit('submitCategory',{username: data.username, code:2});
 	}
 });
 
@@ -1560,14 +1561,14 @@ socket.on('deleteCat',function(data){
 		if (err) {sendMail(error.getCategory); logerr(err); return; }
 		var cat_name=rows[0].name;	
 		var cat_teamID = rows[0].team_ID;
-		console.log(cat_teamID);
+		//console.log(cat_teamID);
 		
 		//get id of team's uncategorized category
 		var query2 = "select id from categories where team_id="+cat_teamID+" AND name='uncategorized';";
 		var exec2= db.query(query2, function(err,rows,fields){
 			if (err) {sendMail(error.getCategory);socket.emit('deleteCat',{username:username, code: 1});return; }
 			var uncategorizedID=rows[0].id;	
-			console.log("uncategorized: "+uncategorizedID+" , id: "+id);
+			//console.log("uncategorized: "+uncategorizedID+" , id: "+id);
 	
 			//set all categories requirements = uncategorized
 			var query3 = "update requirements as r, categories as c set r.category="+uncategorizedID+" WHERE r.category="+id+";";
@@ -1619,15 +1620,33 @@ socket.on('getEditData',function(id){
 
 // schreibe neue Kategoriedaten von der Bearbeitung wieder in Datenbank
 socket.on('submitEdit',function(data){
-var name = data.newName;
-var id= data.id;
+	var name = data.newName;
+	var id= data.id;
+	var exists = false;
 
-var query = "update categories set name='"+name+" 'where id="+id+";";
-	var exec= db.query(query, function(err,rows,fields){
-		if (err) {sendMail(error.submitCategory); logerr(err);return; }
-		socket.emit('submitEdit');
+	var query0 = "select team_id from categories where id="+id+";";
+	var exec= db.query(query0, function(err,rows,fields){
+		var query = "select categories.name from categories, team where categories.team_id=team.id AND team.id="+rows[0].team_id+";";
+		var exec= db.query(query, function(err,rows,fields){
+			for(var i=0;i< rows.length;i++){
+				if(rows[i].name == name){
+					exists = true;
+				}
+			}
+				if (!exists) {
+					var query2 = "update categories set name='"+name+"' where id="+id+";";
+					var exec= db.query(query2, function(err,rows,fields){
+						if (err) {sendMail(error.submitCategory); logerr(err);return; }
+						socket.emit('submitEdit',0);
+					});
+				} else {
+					socket.emit('submitEdit',1);
+				}
+		});
 	});
 });
+	
+
 
 
 ////////////////
