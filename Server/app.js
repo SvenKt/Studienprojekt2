@@ -191,7 +191,6 @@ function traceLog(mess) {
 
 if(db_connect.host != undefined){
 	dbSpecified = true;
-	console.log("db:"+db_connect);
 	var db = mysql.createConnection({
 	    host: db_connect.host,
 	    user: db_connect.user,
@@ -207,9 +206,11 @@ if (dbSpecified){
 	db.connect(function(err){
 	    if (err) {
 			logerr("couldn't connect to database, check credentials");
+			console.log("ERROR: Could not connect to database\n-->Check credentials\n-->Check if database is running\n-->Check firewall configuration\n");
 			throw err;
 		}//console.log(err)
 		traceLog("connected to database");
+		console.log("Database connected");
 	});
 }
 //server h�rt auf port 3000 --> verbindung mittels "localhost:3000"
