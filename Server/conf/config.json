@@ -1,0 +1,13 @@
+{
+"Reports_Enabled":"",
+"Relay_Service":"",
+"Mail_Relay_User":"",
+"Mail_Sender_Email":"",
+"Mail_Relay_Password":"",
+"Mail_Recipient_Email":"",
+"db_user":"reqmanager",
+"db_host":"localhost",
+"db_pass":"",
+"db_name":"requirement",
+"val":"val"
+}

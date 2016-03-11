@@ -1,0 +1,17 @@
+Logfile startet on 2016_2_13-13-26-38
+#connected to database at 2016_2_13-13-26-38
+#new user has logged in at 2016_2_13-13-26-47
+#User has been disconnected at 2016_2_13-13-26-47
+#User has been disconnected at 2016_2_13-13-26-50
+#new user has logged in at 2016_2_13-13-26-57
+#User has been disconnected at 2016_2_13-13-26-57
+#{name: sven, socket: QpndwXaXfIry9qYsAAAD} has been added to array at 2016_2_13-13-26-59
+#User has been disconnected at 2016_2_13-13-27-5
+#new user has logged in at 2016_2_13-13-27-11
+#User has been disconnected at 2016_2_13-13-27-11
+#{name: sven2, socket: lpSEYMQ1mcsm0TJcAAAF} has been added to array at 2016_2_13-13-27-12
+#team owner has been inserted as team member at 2016_2_13-13-27-20
+#submit neu at 2016_2_13-13-27-27
+#a new requirement has been created at 2016_2_13-13-27-40
+#User has been disconnected at 2016_2_13-13-27-55
+#User has been disconnected at 2016_2_13-13-27-58

@@ -1,0 +1,11 @@
+Logfile startet on 2016_2_13-13-15-14
+#database test successful at 2016_2_13-13-18-5
+#database test successful at 2016_2_13-13-18-5
+#database test successful at 2016_2_13-13-18-5
+#database test successful at 2016_2_13-13-18-5
+#database test successful at 2016_2_13-13-18-20
+#database test successful at 2016_2_13-13-18-47
+#database configuration has been saved at 2016_2_13-13-18-49
+#User has been disconnected at 2016_2_13-13-18-49
+#User has been disconnected at 2016_2_13-13-26-28
+#User has been disconnected at 2016_2_13-13-26-31

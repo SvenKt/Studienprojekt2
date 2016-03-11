@@ -1,7 +1,3 @@
-////////////////
-//USES user.js//
-////////////////
-
 $(document).ready(function(){
 	//hide for adminpage
 	$("#admin_error").hide();

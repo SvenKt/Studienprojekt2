@@ -1638,18 +1638,18 @@ var user;
 sessionID = Date.now();
 user= name;
 //objekt user wird in den lokalen datenstream übertragen, um überall verfügbar zu sein.
-localStorage.setItem("user"+sessionID, JSON.stringify(user));
+setSessionItem("user"+sessionID, JSON.stringify(user));
 return sessionID;
 }
 
 function getUserName(){
 var user;
 if (window.location.pathname.search("dash") != -1){	 
-	 user = JSON.parse(localStorage.getItem("user"+getParameter("session")));
+	 user = JSON.parse(getSessionItem("user"+getParameter("session")));
 } else if (window.location.pathname.search("admin") != -1){
-		user = JSON.parse(localStorage.getItem("user"+getParameter("session")));
+		user = JSON.parse(getSessionItem("user"+getParameter("session")));
 	}
-else {	 user = JSON.parse(localStorage.getItem("user"+sessionID));
+else {	 user = JSON.parse(getSessionItem("user"+sessionID));
 }
 return user; 
 }
@@ -1663,7 +1663,7 @@ function redirectToDashboard(){
 }
 
 function logOut(){
-	localStorage.removeItem("user"+getParameter("session"));
+	sessionStorage.clear();
 	location.replace("index.html");
 }
 
@@ -1878,8 +1878,5 @@ function getSessionItem(key){
 	return sessionStorage.getItem(key);
 }
 
-function removeSessionItem(key){
-	sessionStorage.removeItem(key);
-}
 
 
